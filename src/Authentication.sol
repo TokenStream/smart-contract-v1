@@ -14,9 +14,6 @@ contract Authentication {
 
     mapping(address => User) addressToUserInfo;
 
-    // Since bytes cannot be used directly as a key in a mapping,
-    // you might need to use a different approach for nameToAddress.
-    // For simplicity, this example uses a mapping from string to address.
     mapping(string => address) nameToAddress;
 
     User[] public users;

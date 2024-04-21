@@ -25,4 +25,42 @@ contract AuthenticationTest is Test {
         vm.expectRevert(Authentication.NAME_NOT_AVAILABLE.selector);
         auth.createAccount(name1); // Test duplicate name
     }
+
+    function testGetUserInfoFromName() public {
+        bytes memory name = bytes("charlie");
+        vm.prank(address(this));
+        auth.createAccount(name);
+
+        Authentication.User memory user = auth.getUserInfoFromName(name);
+        assertEq(user.name, name);
+        assertEq(user.address_, address(this));
+    }
+
+    function testUsernameExist() public {
+        bytes memory name1 = bytes("david");
+        bytes memory name2 = bytes("eve");
+
+        vm.prank(address(this));
+        auth.createAccount(name1);
+        assertTrue(auth.usernameExist(name1));
+        assertFalse(auth.usernameExist(name2));
+    }
+
+    function testGetAllUsers() public {
+        bytes memory name1 = bytes("frank");
+        bytes memory name2 = bytes("grace");
+
+        vm.prank(address(this));
+        auth.createAccount(name1);
+
+        vm.prank(address(0x1234));
+        auth.createAccount(name2);
+
+        Authentication.User[] memory users = auth.getAllUsers();
+        assertEq(users.length, 2);
+        assertEq(users[0].name, name1);
+        assertEq(users[0].address_, address(this));
+        assertEq(users[1].name, name2);
+        assertEq(users[1].address_, address(0x1234));
+    }
 }
