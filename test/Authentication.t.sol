@@ -25,4 +25,14 @@ contract AuthenticationTest is Test {
         vm.expectRevert(Authentication.NAME_NOT_AVAILABLE.selector);
         auth.createAccount(name1); // Test duplicate name
     }
+
+    function testGetUserInfoFromName() public {
+        bytes memory name = bytes("charlie");
+        vm.prank(address(this));
+        auth.createAccount(name);
+
+        Authentication.User memory user = auth.getUserInfoFromName(name);
+        assertEq(user.name, name);
+        assertEq(user.address_, address(this));
+    }
 }
