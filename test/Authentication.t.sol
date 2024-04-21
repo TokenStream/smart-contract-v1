@@ -35,4 +35,14 @@ contract AuthenticationTest is Test {
         assertEq(user.name, name);
         assertEq(user.address_, address(this));
     }
+
+    function testUsernameExist() public {
+        bytes memory name1 = bytes("david");
+        bytes memory name2 = bytes("eve");
+
+        vm.prank(address(this));
+        auth.createAccount(name1);
+        assertTrue(auth.usernameExist(name1));
+        assertFalse(auth.usernameExist(name2));
+    }
 }
