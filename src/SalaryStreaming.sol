@@ -92,8 +92,6 @@ contract SalaryStreaming {
         emit StreamResumed(_recipient);
     }
 
-
-
     function stopStream(uint256 index) public {
         onlyOwner();
         require(index < allStreams.length, "Index out of bounds");
@@ -108,7 +106,9 @@ contract SalaryStreaming {
         streamCount = streamCount - 1;
     }
 
-    function getStream(address _recipient)
+    function getStream(
+        address _recipient
+    )
         external
         view
         returns (
@@ -133,8 +133,16 @@ contract SalaryStreaming {
 
     function stopAllStreams() external {
         onlyOwner();
+        // Mark all streams as inactive first and emit the necessary events
         for (uint256 i = 0; i < allStreams.length; i++) {
-            stopStream(i); // Stop the stream without checking its active status
+            if (allStreams[i].active) {
+                allStreams[i].active = false;
+                emit StreamStopped(allStreams[i].recipient);
+            }
         }
+
+        // Clean up the allStreams array after marking as inactive
+        delete allStreams;
+        streamCount = 0;
     }
 }

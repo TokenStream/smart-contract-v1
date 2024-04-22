@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract Token is ERC20("Token", "TK") {
     bool _hasMinted;
 
-    function mint() external payable {
+    function mint(address _recipient, uint256 _amount) external payable {
         require(_hasMinted == false);
         _hasMinted = true;
-        _mint(msg.sender, 10000000000 * 10 ** 18);
+        _mint(_recipient, _amount);
     }
 }
