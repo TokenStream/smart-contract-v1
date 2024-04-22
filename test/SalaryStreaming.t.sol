@@ -74,6 +74,26 @@ contract SalaryStreamingTest is Test {
         assertEq(active, true, "Stream should be resumed");
     }
 
+    function test_GetStream() public {
+        uint256 startAmount = 10 * 10 ** 18;
+        vm.prank(owner);
+
+        uint256 interval = 1;
+        salaryStreaming.startStream(A, startAmount, interval);
+
+        (
+            uint256 startTime,
+            uint256 totalAmount,
+            uint256 returnedInterval,
+            bool active
+        ) = salaryStreaming.getStream(A);
+
+        assertEq(startTime, block.timestamp, "Start time does not match");
+        assertEq(totalAmount, startAmount, "Total amount does not match");
+        assertEq(returnedInterval, interval, "Interval does not match");
+        assertEq(active, true, "Stream should be active");
+    }
+
     function mkaddr(string memory name) public returns (address) {
         address addr = address(
             uint160(uint256(keccak256(abi.encodePacked(name))))
