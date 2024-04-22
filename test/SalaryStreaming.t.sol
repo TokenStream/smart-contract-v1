@@ -48,6 +48,32 @@ contract SalaryStreamingTest is Test {
     //     assertEq(counter.number(), x);
     // }
 
+    function test_PauseStream() public {
+        uint256 startAmount = 10 * 10 ** 18;
+        uint256 balBefore = erc20.balanceOf(owner);
+        console.log("owner balance before: ", balBefore);
+
+        vm.prank(owner);
+        salaryStreaming.startStream(A, startAmount, 1);
+
+        salaryStreaming.pauseStream(A);
+
+        (, , , bool active) = salaryStreaming.getStream(A);
+        assertEq(active, false, "Stream should be paused");
+    }
+
+    function test_ResumeStream() public {
+        uint256 startAmount = 10 * 10 ** 18;
+        vm.prank(owner);
+        salaryStreaming.startStream(A, startAmount, 1);
+        salaryStreaming.pauseStream(A);
+
+        salaryStreaming.resumeStream(A);
+
+        (, , , bool active) = salaryStreaming.getStream(A);
+        assertEq(active, true, "Stream should be resumed");
+    }
+
     function mkaddr(string memory name) public returns (address) {
         address addr = address(
             uint160(uint256(keccak256(abi.encodePacked(name))))
