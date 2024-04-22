@@ -5,11 +5,9 @@ import {Test, console} from "forge-std/Test.sol";
 import {SalaryStreaming} from "../src/SalaryStreaming.sol";
 import {Token} from "../src/Token.sol";
 
-
 contract SalaryStreamingTest is Test {
     SalaryStreaming public salaryStreaming;
     Token public erc20;
-
 
     address A = address(0xa);
     address B = address(0xb);
@@ -17,32 +15,34 @@ contract SalaryStreamingTest is Test {
 
     function setUp() public {
         erc20 = new Token();
-        // Mint some tokens for testing
-        erc20.mint();
+        erc20.mint(owner, 10000 * 10 ** 18); // Mint tokens directly to the owner
 
-        salaryStreaming = new SalaryStreaming(address(erc20));  
-       
-        erc20.approve(address(salaryStreaming), 10000 * (10 ** 18)); 
-        // erc20.transfer(address(salaryStreaming), 100);      
+        salaryStreaming = new SalaryStreaming(address(erc20));
+        vm.startPrank(owner);
+        erc20.approve(address(salaryStreaming), 10000 * 10 ** 18); // Owner approves SalaryStreaming to use their tokens
+        vm.stopPrank();
     }
 
- function test_StartStream() public { 
-    owner = mkaddr("owner");
-    A = mkaddr("recipient1"); 
+    function test_StartStream() public {
+        uint256 startAmount = 10 * 10 ** 18;
+        uint256 balBefore = erc20.balanceOf(owner);
+        console.log("owner balance before: ", balBefore);
 
-    // Ensure the owner has enough tokens
-    erc20.approve(address(owner), 10000 * (10 ** 18));
-    erc20.transfer(owner, 10 * (10 ** 18)); // Assuming 18 decimals
+        vm.prank(owner);
+        salaryStreaming.startStream(A, startAmount, 1); // Use startAmount for clarity
 
-    uint256 bal = erc20.balanceOf(owner);
-    
-    console.log("owner balance: ", bal);
+        uint256 balAfter = erc20.balanceOf(owner);
+        console.log("owner balance after: ", balAfter);
+        assertEq(
+            balAfter,
+            balBefore - startAmount,
+            "Balance should decrease by the amount of the stream"
+        );
 
-    vm.prank(owner); 
-    salaryStreaming.startStream(A, 10, 1);
-    (, , , bool active) = salaryStreaming.getStream(A);
-    assertEq(active, true);
-}
+        (, , , bool active) = salaryStreaming.getStream(A);
+        assertEq(active, true, "Stream should be active after start");
+    }
+
     // function test_pauseStream(uint256 x) public {
     //     counter.setNumber(x);
     //     assertEq(counter.number(), x);
