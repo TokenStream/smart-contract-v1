@@ -22,7 +22,7 @@ contract SalaryStreaming {
     mapping(address => Stream) public streams;
     IERC20 public token;
     uint256 public streamCount;
-    address public owner;
+    address public admin;
 
     event StreamStarted(
         address indexed recipient,
@@ -36,12 +36,11 @@ contract SalaryStreaming {
     event PaymentReceived(address indexed recipient, uint256 amount);
 
     constructor(address _token) {
-        token = IERC20(_token);
-        owner = msg.sender;
+        token = IERC20(_token);      
     }
 
-    function onlyOwner() private view {
-        require(msg.sender == owner, "Only Owner can call this function");
+    function onlyAdmin() private view {
+        require(msg.sender == admin, "Only Owner can call this function");
     }
 
     function startStream(
@@ -49,6 +48,8 @@ contract SalaryStreaming {
         uint256 _amount,
         uint256 _interval
     ) external {
+        msg.sender == admin;
+        onlyAdmin();
         require(_recipient != address(0));
         require(
             block.timestamp >= streams[_recipient].lastPayment + _interval,
@@ -79,21 +80,21 @@ contract SalaryStreaming {
     }
 
     function pauseStream(address _recipient) external {
-        onlyOwner();
+        onlyAdmin();
         require(streams[_recipient].active, "Stream not active");
         streams[_recipient].active = false;
         emit StreamPaused(_recipient);
     }
 
     function resumeStream(address _recipient) external {
-        onlyOwner();
+        onlyAdmin();
         require(!streams[_recipient].active, "Stream already active");
         streams[_recipient].active = true;
         emit StreamResumed(_recipient);
     }
 
     function stopStream(uint256 index) public {
-        onlyOwner();
+        onlyAdmin();
         require(index < allStreams.length, "Index out of bounds");
         require(allStreams[index].active, "Stream not active");
 
@@ -132,7 +133,7 @@ contract SalaryStreaming {
     }
 
     function stopAllStreams() external {
-        onlyOwner();
+        onlyAdmin();
         // Mark all streams as inactive first and emit the necessary events
         for (uint256 i = 0; i < allStreams.length; i++) {
             if (allStreams[i].active) {

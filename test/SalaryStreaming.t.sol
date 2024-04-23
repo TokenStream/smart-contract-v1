@@ -18,6 +18,7 @@ contract SalaryStreamingTest is Test {
         erc20.mint(owner, 10000 * 10 ** 18); // Mint tokens directly to the owner
 
         salaryStreaming = new SalaryStreaming(address(erc20));
+        
         vm.startPrank(owner);
         erc20.approve(address(salaryStreaming), 10000 * 10 ** 18); // Owner approves SalaryStreaming to use their tokens
         vm.stopPrank();
