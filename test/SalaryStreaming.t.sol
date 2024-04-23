@@ -43,6 +43,22 @@ contract SalaryStreamingTest is Test {
         assertEq(active, true, "Stream should be active after start");
     }
 
+    function test_StreamPayment() public {
+        uint256 startAmount = 10 * 10 ** 18;
+        uint256 interval = 1;
+        vm.prank(owner);
+        salaryStreaming.startStream(A, startAmount, interval);
+
+        vm.warp(1 seconds);
+
+        uint256 expectedBalance = startAmount;
+        assertEq(
+            erc20.balanceOf(A),
+            expectedBalance,
+            "Recipient should receive the start amount"
+        );
+    }
+
     // function test_pauseStream(uint256 x) public {
     //     counter.setNumber(x);
     //     assertEq(counter.number(), x);
