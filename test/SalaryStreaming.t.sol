@@ -26,13 +26,11 @@ contract SalaryStreamingTest is Test {
     function test_StartStream() public {
         uint256 startAmount = 10 * 10 ** 18;
         uint256 balBefore = erc20.balanceOf(owner);
-        console.log("owner balance before: ", balBefore);
 
         vm.prank(owner);
         salaryStreaming.startStream(A, startAmount, 1); // Use startAmount for clarity
 
         uint256 balAfter = erc20.balanceOf(owner);
-        console.log("owner balance after: ", balAfter);
         assertEq(
             balAfter,
             balBefore - startAmount,
@@ -67,7 +65,6 @@ contract SalaryStreamingTest is Test {
     function test_PauseStream() public {
         uint256 startAmount = 10 * 10 ** 18;
         uint256 balBefore = erc20.balanceOf(owner);
-        console.log("owner balance before: ", balBefore);
 
         vm.prank(owner);
         salaryStreaming.startStream(A, startAmount, 1);
