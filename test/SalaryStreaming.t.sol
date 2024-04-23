@@ -110,6 +110,7 @@ contract SalaryStreamingTest is Test {
         assertEq(active, true, "Stream should be active");
     }
 
+    //
     function mkaddr(string memory name) public returns (address) {
         address addr = address(
             uint160(uint256(keccak256(abi.encodePacked(name))))
