@@ -35,8 +35,9 @@ contract SalaryStreaming {
     event StreamStopped(address indexed recipient);
     event PaymentReceived(address indexed recipient, uint256 amount);
 
-    constructor(address _token) {
-        token = IERC20(_token);      
+    constructor(address _token, address _admin) {
+        token = IERC20(_token);
+        admin = _admin;
     }
 
     function onlyAdmin() private view {
