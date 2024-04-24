@@ -17,8 +17,8 @@ contract SalaryStreamingTest is Test {
         erc20 = new Token();
         erc20.mint(owner, 10000 * 10 ** 18); // Mint tokens directly to the owner
 
-        salaryStreaming = new SalaryStreaming(address(erc20));
-        
+        salaryStreaming = new SalaryStreaming(address(erc20), owner);
+
         vm.startPrank(owner);
         erc20.approve(address(salaryStreaming), 10000 * 10 ** 18); // Owner approves SalaryStreaming to use their tokens
         vm.stopPrank();
@@ -65,10 +65,10 @@ contract SalaryStreamingTest is Test {
 
     function test_PauseStream() public {
         uint256 startAmount = 10 * 10 ** 18;
-        uint256 balBefore = erc20.balanceOf(owner);
+        uint256 interval = 1;
 
         vm.prank(owner);
-        salaryStreaming.startStream(A, startAmount, 1);
+        salaryStreaming.startStream(A, startAmount, interval);
 
         salaryStreaming.pauseStream(A);
 
@@ -78,8 +78,10 @@ contract SalaryStreamingTest is Test {
 
     function test_ResumeStream() public {
         uint256 startAmount = 10 * 10 ** 18;
+        uint256 interval = 1;
         vm.prank(owner);
-        salaryStreaming.startStream(A, startAmount, 1);
+
+        salaryStreaming.startStream(A, startAmount, interval);
         salaryStreaming.pauseStream(A);
 
         salaryStreaming.resumeStream(A);
