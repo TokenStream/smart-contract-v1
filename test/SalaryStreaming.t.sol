@@ -67,19 +67,20 @@ contract SalaryStreamingTest is Test {
         uint256 startAmount = 10 * 10 ** 18;
         uint256 interval = 1;
 
-        vm.prank(owner);
+        vm.startPrank(owner);
         salaryStreaming.startStream(A, startAmount, interval);
 
         salaryStreaming.pauseStream(A);
 
         (, , , bool active) = salaryStreaming.getStream(A);
+        vm.stopPrank();
         assertEq(active, false, "Stream should be paused");
     }
 
     function test_ResumeStream() public {
         uint256 startAmount = 10 * 10 ** 18;
         uint256 interval = 1;
-        vm.prank(owner);
+        vm.startPrank(owner);
 
         salaryStreaming.startStream(A, startAmount, interval);
         salaryStreaming.pauseStream(A);
@@ -87,6 +88,8 @@ contract SalaryStreamingTest is Test {
         salaryStreaming.resumeStream(A);
 
         (, , , bool active) = salaryStreaming.getStream(A);
+        vm.stopPrank();
+
         assertEq(active, true, "Stream should be resumed");
     }
 
