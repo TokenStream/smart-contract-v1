@@ -58,11 +58,6 @@ contract SalaryStreamingTest is Test {
         );
     }
 
-    // function test_pauseStream(uint256 x) public {
-    //     counter.setNumber(x);
-    //     assertEq(counter.number(), x);
-    // }
-
     function test_PauseStream() public {
         uint256 startAmount = 10 * 10 ** 18;
         uint256 interval = 1;
