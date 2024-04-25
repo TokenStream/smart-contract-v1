@@ -15,12 +15,12 @@ contract SalaryStreamingTest is Test {
 
     function setUp() public {
         erc20 = new Token();
-        erc20.mint(owner, 10000 * 10 ** 18); // Mint tokens directly to the owner
+        erc20.mint(owner, 10000 * 10 ** 18);
 
         salaryStreaming = new SalaryStreaming(address(erc20), owner);
 
         vm.startPrank(owner);
-        erc20.approve(address(salaryStreaming), 10000 * 10 ** 18); // Owner approves SalaryStreaming to use their tokens
+        erc20.approve(address(salaryStreaming), 10000 * 10 ** 18);
         vm.stopPrank();
     }
 
