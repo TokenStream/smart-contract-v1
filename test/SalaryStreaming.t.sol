@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
 import {SalaryStreaming} from "../src/SalaryStreaming.sol";
@@ -106,6 +106,39 @@ contract SalaryStreamingTest is Test {
         assertEq(totalAmount, startAmount, "Total amount does not match");
         assertEq(returnedInterval, interval, "Interval does not match");
         assertEq(active, true, "Stream should be active");
+    }
+
+    function test_StopAllStreams() public {
+        vm.startPrank(owner);
+
+        // Setup: Start two streams for testing
+        uint256 startAmount = 10 * 10 ** 18;
+        uint256 interval = 1;
+
+        salaryStreaming.startStream(A, startAmount, interval);
+        salaryStreaming.startStream(B, startAmount, interval);
+
+        // Verify that both streams are active before stopping
+        (, , , bool activeA) = salaryStreaming.getStream(A);
+        assertEq(activeA, true, "Stream A should be active");
+
+        (, , , bool activeB) = salaryStreaming.getStream(B);
+        assertEq(activeB, true, "Stream A should be active");
+
+        // Stop all streams
+        salaryStreaming.stopAllStreams();
+
+        // Verify that both streams are now inactive
+        salaryStreaming.pauseStream(A);
+        salaryStreaming.pauseStream(B);
+
+        (, , , bool active) = salaryStreaming.getStream(A);
+        assertEq(active, false, "Stream should be paused");
+
+        (, , , bool active2) = salaryStreaming.getStream(B);
+        assertEq(active2, false, "Stream should be paused");
+
+        vm.stopPrank();
     }
 
     //

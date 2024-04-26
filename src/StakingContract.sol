@@ -25,7 +25,7 @@ contract StakingPool {
         uint256 rewardRate;
     }
 
-    mapping(uint256 => Pool) internal pools;
+    mapping(uint256 => Pool) private pools;
 
     event poolCreated(
         uint256 PoolID,
