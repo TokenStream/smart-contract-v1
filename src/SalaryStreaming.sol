@@ -17,7 +17,7 @@ contract SalaryStreaming {
     }
 
     //An array of all streams
-    Stream[] allStreams;
+    Stream[] public allStreams;
 
     mapping(address => Stream) public streams;
     IERC20 public token;
