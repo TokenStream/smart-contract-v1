@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract SubscriptionService {
     IERC20 public token;
     address public owner;
+    address nextOwner;
 
     struct SubscriptionPlan {
         string name;
@@ -173,4 +174,19 @@ contract SubscriptionService {
     {
         return plans;
     }
+
+    //change ownership
+    function transferOwnership(address _newOwner) external onlyOwner {
+
+        nextOwner = _newOwner;
+    }
+
+    function claimOwnership() external {
+        require(msg.sender == nextOwner, "not next owner");
+
+        owner = msg.sender;
+        
+        nextOwner = address(0);
+    }
+
 }
