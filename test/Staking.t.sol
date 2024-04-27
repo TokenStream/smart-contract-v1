@@ -126,14 +126,6 @@ contract StakingPoolTest is Test {
         assertEq(stakeBal, 0, "Unstaking error");
     }
 
-    // function testClaimRewards() public {
-    //     vm.startPrank(address(staker));
-
-    //     testStake();
-    //     testGetUserPoolRewardPerSec();
-    //     stakingPool.claimReward(0);
-    // }
-
     function testGetUserClaimableReward() public {
         uint256 stakeAmount = 0;
         uint256 initialRewardRate = 100;
