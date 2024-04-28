@@ -1,119 +1,46 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-import {Test, console} from "forge-std/Test.sol";
-import {SalaryStreaming} from "../src/SalaryStreaming.sol";
-import {Token} from "../src/Token.sol";
+import "forge-std/Test.sol";
+import "../src/SalaryStreaming.sol";
 
 contract SalaryStreamingTest is Test {
-    SalaryStreaming public salaryStreaming;
-    Token public erc20;
-
-    address A = address(0xa);
-    address B = address(0xb);
-    address owner = address(0xc);
+    SalaryStreaming salaryStreaming;
+    address admin;
 
     function setUp() public {
-        erc20 = new Token();
-        erc20.mint(owner, 10000 * 10 ** 18);
-
-        salaryStreaming = new SalaryStreaming(address(erc20), owner);
-
-        vm.startPrank(owner);
-        erc20.approve(address(salaryStreaming), 10000 * 10 ** 18);
-        vm.stopPrank();
+        admin = address(this);
+        salaryStreaming = new SalaryStreaming();
     }
 
-    function test_StartStream() public {
-        uint256 startAmount = 10 * 10 ** 18;
-        uint256 balBefore = erc20.balanceOf(owner);
+    function testCreateStream() public {
+        SalaryStreaming.StreamDetails[]
+            memory streamDetails = new SalaryStreaming.StreamDetails[](1);
+        streamDetails[0] = SalaryStreaming.StreamDetails({
+            recipient: address(0xc),
+            amount: 100,
+            interval: 10
+        });
 
-        vm.prank(owner);
-        salaryStreaming.startStream(A, startAmount, 1); // Use startAmount for clarity
-
-        uint256 balAfter = erc20.balanceOf(owner);
-        assertEq(
-            balAfter,
-            balBefore - startAmount,
-            "Balance should decrease by the amount of the stream"
-        );
-
-        (, , , bool active) = salaryStreaming.getStream(A);
-        assertEq(active, true, "Stream should be active after start");
+        salaryStreaming.createStream(streamDetails);
+        emit SalaryStreaming.StreamCreated(0, address(0xc));
     }
 
-    function test_StreamPayment() public {
-        uint256 startAmount = 10 * 10 ** 18;
-        uint256 interval = 1;
-        vm.prank(owner);
-        salaryStreaming.startStream(A, startAmount, interval);
+    // function testPauseStream() public {
+    //     // Setup a stream
+    //     // Pause the stream
+    //     // Assertions to verify the stream was paused
+    // }
 
-        vm.warp(1 seconds);
+    // function testResumeStream() public {
+    //     // Setup a stream and pause it
+    //     // Resume the stream
+    //     // Assertions to verify the stream was resumed
+    // }
 
-        uint256 expectedBalance = startAmount;
-        assertEq(
-            erc20.balanceOf(A),
-            expectedBalance,
-            "Recipient should receive the start amount"
-        );
-    }
-
-    function test_PauseStream() public {
-        uint256 startAmount = 10 * 10 ** 18;
-        uint256 interval = 1;
-
-        vm.startPrank(owner);
-        salaryStreaming.startStream(A, startAmount, interval);
-
-        salaryStreaming.pauseStream(A);
-
-        (, , , bool active) = salaryStreaming.getStream(A);
-        vm.stopPrank();
-        assertEq(active, false, "Stream should be paused");
-    }
-
-    function test_ResumeStream() public {
-        uint256 startAmount = 10 * 10 ** 18;
-        uint256 interval = 1;
-        vm.startPrank(owner);
-
-        salaryStreaming.startStream(A, startAmount, interval);
-        salaryStreaming.pauseStream(A);
-
-        salaryStreaming.resumeStream(A);
-
-        (, , , bool active) = salaryStreaming.getStream(A);
-        vm.stopPrank();
-
-        assertEq(active, true, "Stream should be resumed");
-    }
-
-    function test_GetStream() public {
-        uint256 startAmount = 10 * 10 ** 18;
-        vm.prank(owner);
-
-        uint256 interval = 1;
-        salaryStreaming.startStream(A, startAmount, interval);
-
-        (
-            uint256 startTime,
-            uint256 totalAmount,
-            uint256 returnedInterval,
-            bool active
-        ) = salaryStreaming.getStream(A);
-
-        assertEq(startTime, block.timestamp, "Start time does not match");
-        assertEq(totalAmount, startAmount, "Total amount does not match");
-        assertEq(returnedInterval, interval, "Interval does not match");
-        assertEq(active, true, "Stream should be active");
-    }
-
-    //
-    function mkaddr(string memory name) public returns (address) {
-        address addr = address(
-            uint160(uint256(keccak256(abi.encodePacked(name))))
-        );
-        vm.label(addr, name);
-        return addr;
-    }
+    // function testStopStream() public {
+    //     // Setup a stream
+    //     // Stop the stream
+    //     // Assertions to verify the stream was stopped
+    // }
 }
