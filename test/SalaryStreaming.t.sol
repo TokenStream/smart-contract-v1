@@ -14,13 +14,8 @@ contract SalaryStreamingTest is Test {
     }
 
     function testCreateStream() public {
-        SalaryStreaming.StreamDetails[]
-            memory streamDetails = new SalaryStreaming.StreamDetails[](1);
-        streamDetails[0] = SalaryStreaming.StreamDetails({
-            recipient: address(0xc),
-            amount: 100,
-            interval: 10
-        });
+        SalaryStreaming.StreamDetails[] memory streamDetails = new SalaryStreaming.StreamDetails[](1);
+        streamDetails[0] = SalaryStreaming.StreamDetails({recipient: address(0xc), amount: 100, interval: 10});
 
         salaryStreaming.createStream(streamDetails);
         emit SalaryStreaming.StreamCreated(0, address(0xc));

@@ -40,22 +40,16 @@ contract Authentication {
     }
 
     // Utility function to convert bytes to string
-    function bytesToString(
-        bytes memory data
-    ) private pure returns (string memory) {
+    function bytesToString(bytes memory data) private pure returns (string memory) {
         return string(data);
     }
 
-    function getUserInfoFromName(
-        bytes calldata _name
-    ) external view returns (User memory) {
+    function getUserInfoFromName(bytes calldata _name) external view returns (User memory) {
         string memory nameStr = bytesToString(_name);
         return addressToUserInfo[nameToAddress[nameStr]];
     }
 
-    function getAddressFromName(
-        bytes calldata _name
-    ) external view returns (address) {
+    function getAddressFromName(bytes calldata _name) external view returns (address) {
         string memory nameStr = bytesToString(_name);
         return nameToAddress[nameStr];
     }

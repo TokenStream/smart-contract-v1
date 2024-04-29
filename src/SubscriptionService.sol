@@ -4,15 +4,15 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract SubscriptionService {
+    address owner;
     IERC20 public token;
-    address public owner;
-    address nextOwner;
 
     struct SubscriptionPlan {
         string name;
         uint256 fee;
         uint256 interval;
         address paymentAddress;
+        bool active; // Add active status to the plan
     }
 
     struct Subscriber {
@@ -21,8 +21,8 @@ contract SubscriptionService {
         uint256[] subscriptionIds;
     }
 
-    SubscriptionPlan[]  plans;
-    mapping(address => Subscriber)  subscribers;
+    SubscriptionPlan[] plans;
+    mapping(address => Subscriber) subscribers;
     mapping(address => uint256) public balances; // user balance in the contract
     mapping(address => mapping(uint256 => bool)) public activeSubscriptions; // active subscriptions
     mapping(address => mapping(uint256 => bool)) public stoppedSubscriptions; // Track stopped subscriptions
@@ -32,12 +32,7 @@ contract SubscriptionService {
     event SubscriptionResumed(address indexed subscriber, uint256 planId);
     event SubscriptionStopped(address indexed subscriber, uint256 planId);
     event SubscriptionRenewed(address indexed subscriber, uint256 planId);
-    event SubscriptionPlanRemoved(uint256 planId);
-
-    constructor(address _token) {
-        token = IERC20(_token); //Initialize token and owner
-        owner = msg.sender;
-    }
+    event SubscriptionPlanDeactivated(uint256 planId); // New event for plan deactivation
 
     //Check for the owner
     modifier onlyOwner() {
@@ -45,21 +40,17 @@ contract SubscriptionService {
         _;
     }
 
-    // user deposits into the contract
-    function deposit(uint256 _amount) external {
-        require(token.balanceOf(msg.sender) >= _amount, "Insufficient balance");
-        token.transferFrom(msg.sender, address(this), _amount);
-        balances[msg.sender] += _amount;
+    constructor(address _token) {
+        token = IERC20(_token); //Initialize token and owner
+        owner = msg.sender;
     }
 
     //create a subscription plan
-    function addSubscriptionPlan(
-        string memory _name,
-        uint256 _fee,
-        uint256 _interval,
-        address _paymentAddress
-    ) external onlyOwner {
-        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress));
+    function addSubscriptionPlan(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
+        external
+        onlyOwner
+    {
+        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true));
     }
 
     //change an existing plan
@@ -71,25 +62,15 @@ contract SubscriptionService {
         address _paymentAddress
     ) external onlyOwner {
         require(planId < plans.length, "Invalid plan ID");
-        plans[planId] = SubscriptionPlan(
-            _name,
-            _fee,
-            _interval,
-            _paymentAddress
-        );
+        plans[planId] = SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true);
     }
 
     //subscribe to an existing plan
     function startSubscription(uint256 planId) public {
         require(planId < plans.length, "Invalid plan ID");
-        require(
-            !activeSubscriptions[msg.sender][planId],
-            "Already subscribed to this plan"
-        );
-        require(
-            balances[msg.sender] >= plans[planId].fee,
-            "Insufficient funds"
-        );
+        require(plans[planId].active, "Plan is not active"); // Check if the plan is active
+        require(!activeSubscriptions[msg.sender][planId], "Already subscribed to this plan");
+        require(balances[msg.sender] >= plans[planId].fee, "Insufficient funds");
 
         SubscriptionPlan memory plan = plans[planId];
         address _paymentAddress = plan.paymentAddress;
@@ -113,10 +94,7 @@ contract SubscriptionService {
     //resume a subscription
     function resumeSubscription(uint256 planId) external {
         require(!activeSubscriptions[msg.sender][planId], "Already active");
-        require(
-            !stoppedSubscriptions[msg.sender][planId],
-            "Subscription has been stopped"
-        );
+        require(!stoppedSubscriptions[msg.sender][planId], "Subscription has been stopped");
         activeSubscriptions[msg.sender][planId] = true;
         emit SubscriptionResumed(msg.sender, planId);
     }
@@ -129,64 +107,31 @@ contract SubscriptionService {
         emit SubscriptionStopped(msg.sender, planId);
     }
 
-    // function removeSubscriptionPlan(uint256 planId) external onlyOwner {
-    //     require(planId < plans.length, "Invalid plan ID");
-    //     // Shift all elements after the planId to fill the gap
-    //     for (uint256 i = planId; i < plans.length - 1; i++) {
-    //         plans[i] = plans[i + 1];
-    //     }
-    //     // Remove the last element
-    //     plans.pop();
-    //     emit SubscriptionPlanRemoved(planId);
-    // }
-
+    function deactivateSubscriptionPlan(uint256 planId) external onlyOwner {
+        require(planId < plans.length, "Invalid plan ID");
+        plans[planId].active = false; // Set the plan's active status to false
+        emit SubscriptionPlanDeactivated(planId); // Emit an event for plan deactivation
+    }
 
     //users customize their subscription
-    function createCustomSubscription(
-        string memory _name,
-        uint256 _fee,
-        uint256 _interval,
-        address _paymentAddress
-    ) external {
+    function createCustomSubscription(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
+        external
+    {
         // Add the custom subscription plan
         uint256 planId = plans.length;
-        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress));
+        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true));
 
         // Start the subscription for the user
         startSubscription(planId);
     }
 
-
     //all subcriptions for a specific user
-    function getUserSubscriptions(address user)
-        external
-        view
-        returns (uint256[] memory)
-    {
+    function getUserSubscriptions(address user) external view returns (uint256[] memory) {
         return subscribers[user].subscriptionIds;
     }
 
-   //all available subscriptions 
-    function getAllSubscriptionPlans()
-        external
-        view
-        returns (SubscriptionPlan[] memory)
-    {
+    //all available subscriptions
+    function getAllSubscriptionPlans() external view returns (SubscriptionPlan[] memory) {
         return plans;
     }
-
-    //change ownership
-    function transferOwnership(address _newOwner) external onlyOwner {
-
-        nextOwner = _newOwner;
-    }
-
-    function claimOwnership() external {
-        require(msg.sender == nextOwner, "not next owner");
-
-        owner = msg.sender;
-        
-        nextOwner = address(0);
-    }
-
 }
