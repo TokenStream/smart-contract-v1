@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {Script, console} from "forge-std/Script.sol";
 import "../src/SalaryStreaming.sol";
 
-contract SubscriptionScript is Script {
+contract SalaryScript is Script {
     function setUp() public {}
 
     function run() public {
@@ -14,7 +14,7 @@ contract SubscriptionScript is Script {
 
         vm.startBroadcast(privateKey);
 
-        TokenSwap tokenSwap = new TokenSwap();
+        SalaryStreaming salaryStreaming = new SalaryStreaming();
 
         vm.stopBroadcast();
     }
