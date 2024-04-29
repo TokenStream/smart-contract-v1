@@ -33,11 +33,7 @@ contract SalaryStreaming {
 
     event StreamPaused(uint256 indexed streamId, address indexed recipient);
     event StreamResumed(uint256 indexed streamId, address indexed recipient);
-    event StreamCreated(
-        uint256 indexed streamId,
-        address indexed recipient,
-        IntervalType intervalType
-    );
+    event StreamCreated(uint256 indexed streamId, address indexed recipient, IntervalType intervalType);
     event StreamStopped(uint256 indexed streamId, address indexed recipient);
 
     constructor() {
@@ -49,10 +45,7 @@ contract SalaryStreaming {
         uint256 amount;
     }
 
-    function createStream(
-        StreamDetails[] calldata _streamDetails,
-        uint8[] calldata _intervalTypes
-    ) external {
+    function createStream(StreamDetails[] calldata _streamDetails, uint8[] calldata _intervalTypes) external {
         onlyAdmin();
         require(
             _streamDetails.length == _intervalTypes.length,
@@ -74,11 +67,7 @@ contract SalaryStreaming {
             );
 
             streamIdsByAddress[_streamDetails[i].recipient] = _id;
-            emit StreamCreated(
-                _id,
-                _streamDetails[i].recipient,
-                IntervalType(_intervalTypes[i])
-            );
+            emit StreamCreated(_id, _streamDetails[i].recipient, IntervalType(_intervalTypes[i]));
         }
     }
 
@@ -154,11 +143,7 @@ contract SalaryStreaming {
         return result;
     }
 
-    function checkMonthlySubscriptions()
-        external
-        view
-        returns (Stream[] memory)
-    {
+    function checkMonthlySubscriptions() external view returns (Stream[] memory) {
         Stream[] memory monthlyStreams = new Stream[](streams.length);
         // this counts the number of daily streams
 

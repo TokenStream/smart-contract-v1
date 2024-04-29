@@ -8,16 +8,16 @@ contract TokenSript is Script {
     function setUp() public {}
 
     function run() public {
-        uint privateKey = vm.envUint("DEV_PRIVATE_KEY");
+        uint256 privateKey = vm.envUint("DEV_PRIVATE_KEY");
         address account = vm.addr(privateKey);
         console.log("account", account);
 
         vm.startBroadcast(privateKey);
 
-    Token token = new Token();
+        Token token = new Token();
 
-    token.transfer()
+        // token.transfer();
 
-        vm.stopBroadcast();
+        // vm.stopBroadcast();
     }
 }

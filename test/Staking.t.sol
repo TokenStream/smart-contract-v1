@@ -17,38 +17,25 @@ contract StakingPoolTest is Test {
         owner = address(this);
         rewardToken = new RewardToken(address(this));
         stakingToken = new StakingToken(address(owner));
-        stakingPool = new StakingPool(
-            address(stakingToken),
-            address(rewardToken)
-        );
+        stakingPool = new StakingPool(address(stakingToken), address(rewardToken));
     }
 
     function testCreatePool() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100E18;
+        uint256 initialRewardReserve = 100e18;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
 
         stakingPool.createPool(initialRewardRate);
 
-        StakingPool.PoolDataReturnedType memory pool = stakingPool.getPoolByID(
-            0
-        );
-        assertEq(
-            pool.rewardRate,
-            initialRewardRate,
-            "Reward rate should match"
-        );
-        assertEq(
-            pool.rewardReserve,
-            initialRewardReserve,
-            "Reward reserve should be 100 tokens"
-        );
+        StakingPool.PoolDataReturnedType memory pool = stakingPool.getPoolByID(0);
+        assertEq(pool.rewardRate, initialRewardRate, "Reward rate should match");
+        assertEq(pool.rewardReserve, initialRewardReserve, "Reward reserve should be 100 tokens");
     }
 
     function testStake() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100E18;
+        uint256 initialRewardReserve = 100e18;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
 
@@ -69,7 +56,7 @@ contract StakingPoolTest is Test {
 
     function testUnstake() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100E18;
+        uint256 initialRewardReserve = 100e18;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
 
@@ -91,7 +78,7 @@ contract StakingPoolTest is Test {
 
     function testGetUserPoolRewardPerSec() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100E18;
+        uint256 initialRewardReserve = 100e18;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
         stakingPool.createPool(initialRewardRate);
@@ -105,18 +92,10 @@ contract StakingPoolTest is Test {
         stakingToken.approve(address(stakingPool), stakeAmount);
         stakingPool.stake(0, stakeAmount);
 
-        uint256 rewardPerSecond = stakingPool.getUserPoolRewardPerSec(
-            0,
-            staker
-        );
+        uint256 rewardPerSecond = stakingPool.getUserPoolRewardPerSec(0, staker);
 
-        uint256 expectedRewardPerSecond = (stakeAmount * initialRewardRate) /
-            86400 seconds;
-        assertEq(
-            rewardPerSecond,
-            expectedRewardPerSecond,
-            "Reward per second should match the expected value"
-        );
+        uint256 expectedRewardPerSecond = (stakeAmount * initialRewardRate) / 86400 seconds;
+        assertEq(rewardPerSecond, expectedRewardPerSecond, "Reward per second should match the expected value");
     }
 
     function testGetUserStakeBalance() public {
@@ -140,12 +119,7 @@ contract StakingPoolTest is Test {
         stakingToken.approve(address(stakingPool), stakeAmount);
         stakingPool.stake(0, stakeAmount);
 
-        uint256 expectedClaimableReward = (stakeAmount * initialRewardRate) /
-            1 seconds;
-        assertEq(
-            claimableReward,
-            expectedClaimableReward,
-            "Claimable reward should match the expected value"
-        );
+        uint256 expectedClaimableReward = (stakeAmount * initialRewardRate) / 1 seconds;
+        assertEq(claimableReward, expectedClaimableReward, "Claimable reward should match the expected value");
     }
 }

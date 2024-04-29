@@ -8,7 +8,7 @@ contract SalaryScript is Script {
     function setUp() public {}
 
     function run() public {
-        uint privateKey = vm.envUint("DEV_PRIVATE_KEY");
+        uint256 privateKey = vm.envUint("DEV_PRIVATE_KEY");
         address account = vm.addr(privateKey);
         console.log("account", account);
 

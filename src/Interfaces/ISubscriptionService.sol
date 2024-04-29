@@ -16,13 +16,8 @@ interface ISubscriptionService {
     event SubscriptionStopped(address indexed subscriber, uint256 planId);
     event SubscriptionPlanDeactivated(uint256 planId);
 
-    function deposit(uint256 _amount) external;
-    function addSubscriptionPlan(
-        string memory _name,
-        uint256 _fee,
-        uint256 _interval,
-        address _paymentAddress
-    ) external;
+    function addSubscriptionPlan(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
+        external;
     function updateSubscriptionPlan(
         uint256 planId,
         string memory _name,
@@ -35,14 +30,8 @@ interface ISubscriptionService {
     function resumeSubscription(uint256 planId) external;
     function stopSubscription(uint256 planId) external;
     function deactivateSubscriptionPlan(uint256 planId) external;
-    function createCustomSubscription(
-        string memory _name,
-        uint256 _fee,
-        uint256 _interval,
-        address _paymentAddress
-    ) external;
+    function createCustomSubscription(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
+        external;
     function getUserSubscriptions(address user) external view returns (uint256[] memory);
     function getAllSubscriptionPlans() external view returns (SubscriptionPlan[] memory);
-    function transferOwnership(address _newOwner) external;
-    function claimOwnership() external;
 }
