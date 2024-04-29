@@ -13,6 +13,7 @@ contract SubscriptionService {
         uint256 fee;
         uint256 interval;
         address paymentAddress;
+        bool active; // Add active status to the plan
     }
 
     struct Subscriber {
@@ -21,8 +22,8 @@ contract SubscriptionService {
         uint256[] subscriptionIds;
     }
 
-    SubscriptionPlan[]  plans;
-    mapping(address => Subscriber)  subscribers;
+    SubscriptionPlan[] plans;
+    mapping(address => Subscriber) subscribers;
     mapping(address => uint256) public balances; // user balance in the contract
     mapping(address => mapping(uint256 => bool)) public activeSubscriptions; // active subscriptions
     mapping(address => mapping(uint256 => bool)) public stoppedSubscriptions; // Track stopped subscriptions
@@ -32,7 +33,7 @@ contract SubscriptionService {
     event SubscriptionResumed(address indexed subscriber, uint256 planId);
     event SubscriptionStopped(address indexed subscriber, uint256 planId);
     event SubscriptionRenewed(address indexed subscriber, uint256 planId);
-    event SubscriptionPlanRemoved(uint256 planId);
+    event SubscriptionPlanDeactivated(uint256 planId); // New event for plan deactivation
 
     constructor(address _token) {
         token = IERC20(_token); //Initialize token and owner
@@ -59,7 +60,9 @@ contract SubscriptionService {
         uint256 _interval,
         address _paymentAddress
     ) external onlyOwner {
-        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress));
+        plans.push(
+            SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true)
+        );
     }
 
     //change an existing plan
@@ -75,13 +78,15 @@ contract SubscriptionService {
             _name,
             _fee,
             _interval,
-            _paymentAddress
+            _paymentAddress,
+            true
         );
     }
 
     //subscribe to an existing plan
     function startSubscription(uint256 planId) public {
         require(planId < plans.length, "Invalid plan ID");
+        require(plans[planId].active, "Plan is not active"); // Check if the plan is active
         require(
             !activeSubscriptions[msg.sender][planId],
             "Already subscribed to this plan"
@@ -129,17 +134,11 @@ contract SubscriptionService {
         emit SubscriptionStopped(msg.sender, planId);
     }
 
-    // function removeSubscriptionPlan(uint256 planId) external onlyOwner {
-    //     require(planId < plans.length, "Invalid plan ID");
-    //     // Shift all elements after the planId to fill the gap
-    //     for (uint256 i = planId; i < plans.length - 1; i++) {
-    //         plans[i] = plans[i + 1];
-    //     }
-    //     // Remove the last element
-    //     plans.pop();
-    //     emit SubscriptionPlanRemoved(planId);
-    // }
-
+    function deactivateSubscriptionPlan(uint256 planId) external onlyOwner {
+        require(planId < plans.length, "Invalid plan ID");
+        plans[planId].active = false; // Set the plan's active status to false
+        emit SubscriptionPlanDeactivated(planId); // Emit an event for plan deactivation
+    }
 
     //users customize their subscription
     function createCustomSubscription(
@@ -150,12 +149,13 @@ contract SubscriptionService {
     ) external {
         // Add the custom subscription plan
         uint256 planId = plans.length;
-        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress));
+        plans.push(
+            SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true)
+        );
 
         // Start the subscription for the user
         startSubscription(planId);
     }
-
 
     //all subcriptions for a specific user
     function getUserSubscriptions(address user)
@@ -166,7 +166,7 @@ contract SubscriptionService {
         return subscribers[user].subscriptionIds;
     }
 
-   //all available subscriptions 
+    //all available subscriptions
     function getAllSubscriptionPlans()
         external
         view
@@ -177,7 +177,6 @@ contract SubscriptionService {
 
     //change ownership
     function transferOwnership(address _newOwner) external onlyOwner {
-
         nextOwner = _newOwner;
     }
 
@@ -185,8 +184,7 @@ contract SubscriptionService {
         require(msg.sender == nextOwner, "not next owner");
 
         owner = msg.sender;
-        
+
         nextOwner = address(0);
     }
-
 }
