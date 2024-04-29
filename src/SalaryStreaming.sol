@@ -7,6 +7,8 @@ error STERAM_IS_NOT_ACTIVE();
 error STREAM_IS_ALREADY_ACTIVE();
 error STREAM_NOT_FOUND_AT_THE_GIVEN_ADDRESS();
 
+pragma solidity ^0.8.0;
+
 contract SalaryStreaming {
     enum IntervalType {
         None,
@@ -51,7 +53,7 @@ contract SalaryStreaming {
         StreamDetails[] calldata _streamDetails,
         uint8[] calldata _intervalTypes
     ) external {
-        require(msg.sender == admin, "Caller is not the admin");
+        onlyAdmin();
         require(
             _streamDetails.length == _intervalTypes.length,
             "Stream details and interval types arrays must have the same length"
@@ -80,13 +82,7 @@ contract SalaryStreaming {
         }
     }
 
-    function onlyAdmin() private view {
-        if (msg.sender != admin) {
-            revert YOU_ARE_NOT_THE_ADMIN();
-        }
-    }
-
-    function pauseStreamByAddress(address _recipient) external {
+    function pauseStream(address _recipient) external {
         onlyAdmin();
         uint256 streamId = streamIdsByAddress[_recipient];
         if (streamId == 0) {
@@ -101,11 +97,15 @@ contract SalaryStreaming {
         emit StreamPaused(streamId, _recipient);
     }
 
-    // Function to resume a stream by recipient address
-    function resumeStreamByAddress(address _recipient) external {
+    function onlyAdmin() private view {
+        if (msg.sender != admin) {
+            revert YOU_ARE_NOT_THE_ADMIN();
+        }
+    }
+
+    function resumeStream(address _recipient) external {
         onlyAdmin();
         uint256 streamId = streamIdsByAddress[_recipient];
-
         if (streamId == 0) {
             revert STREAM_NOT_FOUND_AT_THE_GIVEN_ADDRESS();
         }
@@ -118,10 +118,9 @@ contract SalaryStreaming {
         emit StreamResumed(streamId, _recipient);
     }
 
-    function stopStreamByAddress(address _recipient) external {
+    function stopStream(address _recipient) external {
         onlyAdmin();
         uint256 streamId = streamIdsByAddress[_recipient];
-
         if (streamId == 0) {
             revert STREAM_NOT_FOUND_AT_THE_GIVEN_ADDRESS();
         }
@@ -132,6 +131,52 @@ contract SalaryStreaming {
 
         streams[streamId].active = false;
         emit StreamStopped(streamId, _recipient);
+    }
+
+    function checkDailySubscriptions() external view returns (Stream[] memory) {
+        Stream[] memory dailyStreams = new Stream[](streams.length);
+        // this counts the number of daily streams
+        uint256 count = 0;
+
+        for (uint256 i = 0; i < streams.length; i++) {
+            if (streams[i].intervalType == IntervalType.Daily) {
+                dailyStreams[count] = streams[i];
+                count++;
+            }
+        }
+
+        // Create a new array with the exact size needed
+        Stream[] memory result = new Stream[](count);
+        for (uint256 i = 0; i < count; i++) {
+            result[i] = dailyStreams[i];
+        }
+
+        return result;
+    }
+
+    function checkMonthlySubscriptions()
+        external
+        view
+        returns (Stream[] memory)
+    {
+        Stream[] memory monthlyStreams = new Stream[](streams.length);
+        // this counts the number of daily streams
+
+        uint256 count = 0;
+        for (uint256 i = 0; i < streams.length; i++) {
+            if (streams[i].intervalType == IntervalType.Monthly) {
+                monthlyStreams[count] = streams[i];
+                count++;
+            }
+        }
+
+        // Create a new array with the exact size needed
+        Stream[] memory result = new Stream[](count);
+        for (uint256 i = 0; i < count; i++) {
+            result[i] = monthlyStreams[i];
+        }
+
+        return result;
     }
 }
 
