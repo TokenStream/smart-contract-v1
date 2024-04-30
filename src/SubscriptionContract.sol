@@ -128,6 +128,8 @@ contract SubscriptionContract {
     }
 
     function deleteUser() external onlyAdmi {
+        require(msg.sender == Admis, "ONLY THE ADMI CAN CALL THIS FUNCTION");
+
         delete users[msg.sender];
         emit SubscriptionDeleted(msg.sender, 0);
     }
@@ -169,7 +171,7 @@ contract SubscriptionContract {
 
     function setSubscriptionDuration(address _user, uint256 _duration) external onlyOwner {
         require(users[msg.sender].hasService[_user] == true, "YOU DON'T HAVE AN SERVICE");
-        require(block.timestamp >= _duration, "IT NOT YRT THE TIME FORE NEXT SUBCRITION");
+        require(block.timestamp >= _duration, "IT NOT YET THE TIME FORE NEXT SUBCRITION");
 
         subscriptionDuration = _duration;
 
