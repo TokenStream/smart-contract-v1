@@ -99,6 +99,32 @@ contract SubscriptionService {
 
         emit SubscriptionStarted(msg.sender, planId);
     }
+    
+        // Function to process payments for all active subscriptions of a user
+    function processSubscriptionPayments() external {     
+
+        // Iterate over all active subscriptions for the user
+        for (uint256 i = 0; i < subscribers[msg.sender].subscriptionIds.length; i++) {
+            uint256 planId = subscribers[msg.sender].subscriptionIds[i];
+            SubscriptionPlan memory plan = plans[planId];
+
+            // Check if the current block timestamp matches the user's lastPaymentTime plus the subscription's interval
+            if (block.timestamp >= subscribers[msg.sender].lastPaymentTime + plan.interval) {
+                // Ensure the user has enough balance to pay the fee
+                require(balances[msg.sender] >= plan.fee, "Insufficient funds");
+
+                // Process the payment
+                balances[msg.sender] -= plan.fee;
+                token.transfer(plan.paymentAddress, plan.fee);
+
+                // Update the lastPaymentTime for this subscription
+                subscribers[msg.sender].lastPaymentTime = block.timestamp;
+
+                // Emit an event for the payment
+                emit SubscriptionRenewed(msg.sender, planId);
+            }
+        }
+    }
 
     //pause a subscription
     function pauseSubscription(uint256 planId) external {

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import "./SubscriptionService.sol";
+import "./ERC20Token.sol";
 import "./Interfaces/IAuthentication.sol";
 import "./Interfaces/IRewardToken.sol";
 import "./Interfaces/ISalaryStreaming.sol";
@@ -10,23 +10,23 @@ import "./Interfaces/IStakingPool.sol";
 import "./Interfaces/ISubscriptionService.sol";
 
 contract ModalContract {
+    SubscriptionService public subscriptionService;
     IAuthentication public authentication;
     IRewardToken public rewardToken;
     IStakingPool public stakingPool;
-    ISubscriptionService public subscriptionService;
     ISalaryStreaming public salaryStreaming;
     IERC20 public token;
     address public owner;
     address nextOwner;
     uint256 public constant REWARD_RATE = 5;
 
-    struct SubscriptionPlan {
-        string name;
-        uint256 fee;
-        uint256 interval;
-        address paymentAddress;
-        bool active;
-    }
+    // struct SubscriptionPlan {
+    //     string name;
+    //     uint256 fee;
+    //     uint256 interval;
+    //     address paymentAddress;
+    //     bool active;
+    // }
 
     event DepositSuccessiful(address indexed user, uint256 _amount);
     event WithdrawalSuccessiful(address indexed user, uint256 _amount);
@@ -42,7 +42,7 @@ contract ModalContract {
         authentication = IAuthentication(_authentication);
         rewardToken = IRewardToken(_rewardToken);
         stakingPool = IStakingPool(_stakingPool);
-        subscriptionService = ISubscriptionService(_subscriptionService);
+        subscriptionService = SubscriptionService(_subscriptionService);
         salaryStreaming = ISalaryStreaming(_salaryStreaming);
         token = IERC20(_token); //Initialize token and owner
         owner = msg.sender;
