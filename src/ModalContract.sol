@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./SubscriptionService.sol";
+// import "./SubscriptionService.sol";
 import "./ERC20Token.sol";
 import "./Interfaces/IAuthentication.sol";
 import "./Interfaces/IRewardToken.sol";
-import "./Interfaces/ISalaryStreaming.sol";
-import "./Interfaces/IStakingPool.sol";
-import "./Interfaces/ISubscriptionService.sol";
+// import "./Interfaces/ISalaryStreaming.sol";
+// import "./Interfaces/IStakingPool.sol";
+// import "./Interfaces/ISubscriptionService.sol";
 
 contract ModalContract {
-    SubscriptionService public subscriptionService;
-    IAuthentication public authentication;
+    // SubscriptionService public subscriptionService;
+    // IAuthentication public authentication;
     IRewardToken public rewardToken;
-    IStakingPool public stakingPool;
-    ISalaryStreaming public salaryStreaming;
-    IERC20 public token;
+    // IStakingPool public stakingPool;
+    // ISalaryStreaming public salaryStreaming;
+    TRiver public token;
     address public owner;
     address nextOwner;
     uint256 public constant REWARD_RATE = 5;
@@ -32,19 +32,19 @@ contract ModalContract {
     event WithdrawalSuccessiful(address indexed user, uint256 _amount);
 
     constructor(
-        address _authentication,
+        // address _authentication,
         address _rewardToken,
-        address _stakingPool,
-        address _subscriptionService,
-        address _salaryStreaming,
+        // address _stakingPool,
+        // address _subscriptionService,
+        // address _salaryStreaming,
         address _token
     ) {
-        authentication = IAuthentication(_authentication);
+        // authentication = IAuthentication(_authentication);
         rewardToken = IRewardToken(_rewardToken);
-        stakingPool = IStakingPool(_stakingPool);
-        subscriptionService = SubscriptionService(_subscriptionService);
-        salaryStreaming = ISalaryStreaming(_salaryStreaming);
-        token = IERC20(_token); //Initialize token and owner
+        // stakingPool = IStakingPool(_stakingPool);
+        // subscriptionService = SubscriptionService(_subscriptionService);
+        // salaryStreaming = ISalaryStreaming(_salaryStreaming);
+        token = TRiver(_token); //Initialize token and owner
         owner = msg.sender;
     }
 
@@ -82,59 +82,63 @@ contract ModalContract {
         rewardToken.transfer(_user, rewardAmount);
     }
 
-    function addSubscriptionPlan(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
-        external
-    {
-        subscriptionService.addSubscriptionPlan(_name, _fee, _interval, _paymentAddress);
+    function updateBalance() external {
+        
     }
 
-    // Function to create an account
-    function createAccount(bytes calldata _name) external {
-        authentication.createAccount(_name);
-    }
+    // function addSubscriptionPlan(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
+    //     external
+    // {
+    //     subscriptionService.addSubscriptionPlan(_name, _fee, _interval, _paymentAddress);
+    // }
 
-    // Functions to interact with the subscription service
-    function startSubscription(uint256 planId) external {
-        subscriptionService.startSubscription(planId);
-    }
+    // // Function to create an account
+    // function createAccount(bytes calldata _name) external {
+    //     authentication.createAccount(_name);
+    // }
 
-    function pauseSubscription(uint256 planId) external {
-        subscriptionService.startSubscription(planId);
-    }
+    // // Functions to interact with the subscription service
+    // function startSubscription(uint256 planId) external {
+    //     subscriptionService.startSubscription(planId);
+    // }
 
-    function resumeSubscription(uint256 planId) external {
-        subscriptionService.resumeSubscription(planId);
-    }
+    // function pauseSubscription(uint256 planId) external {
+    //     subscriptionService.startSubscription(planId);
+    // }
 
-    function stopSubscription(uint256 planId) external {
-        subscriptionService.stopSubscription(planId);
-    }
+    // function resumeSubscription(uint256 planId) external {
+    //     subscriptionService.resumeSubscription(planId);
+    // }
 
-    function deactivateSubscriptionPlan(uint256 planId) external {
-        subscriptionService.startSubscription(planId);
-    }
+    // function stopSubscription(uint256 planId) external {
+    //     subscriptionService.stopSubscription(planId);
+    // }
 
-    function createCustomSubscription(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
-        external
-    {
-        subscriptionService.createCustomSubscription(_name, _fee, _interval, _paymentAddress);
-    }
-    // Functions to interact with the staking pool
+    // function deactivateSubscriptionPlan(uint256 planId) external {
+    //     subscriptionService.startSubscription(planId);
+    // }
 
-    function stake(uint256 _poolID, uint256 _amount) external {
-        stakingPool.stake(_poolID, _amount);
-    }
+    // function createCustomSubscription(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
+    //     external
+    // {
+    //     subscriptionService.createCustomSubscription(_name, _fee, _interval, _paymentAddress);
+    // }
+    // // Functions to interact with the staking pool
 
-    function createPool(uint256 _rewardRate) external {
-        stakingPool.createPool(_rewardRate);
-    }
+    // function stake(uint256 _poolID, uint256 _amount) external {
+    //     stakingPool.stake(_poolID, _amount);
+    // }
 
-    // Functions to interact with the salary streaming service
-    function createStream(address[] calldata recipients, uint256[] calldata amount, uint8[] calldata intervalTypes)
-        external
-    {
-        salaryStreaming.createStream(recipients, amount, intervalTypes);
-    }
+    // function createPool(uint256 _rewardRate) external {
+    //     stakingPool.createPool(_rewardRate);
+    // }
+
+    // // Functions to interact with the salary streaming service
+    // function createStream(address[] calldata recipients, uint256[] calldata amount, uint8[] calldata intervalTypes)
+    //     external
+    // {
+    //     salaryStreaming.createStream(recipients, amount, intervalTypes);
+    // }
 
     //change ownership
     function transferOwnership(address _newOwner) external onlyOwner {
