@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {ModalContract} from "../src/ModalContract.sol";
+
 contract SalaryStreaming {
+    ModalContract public modalContract;
+
     enum IntervalType {
         None,
         Daily,
@@ -16,6 +20,7 @@ contract SalaryStreaming {
         uint256 startTime;
         IntervalType intervalType;
         bool active;
+        address streamOwner;
     }
 
     event StreamCreated(
@@ -27,6 +32,11 @@ contract SalaryStreaming {
     event StreamPaused(address indexed recipient, IntervalType intervalType);
     event StreamResumed(address indexed recipient, IntervalType intervalType);
     event StreamStopped(address indexed recipient, IntervalType intervalType);
+    event disbursementSuccessful(
+        address sender,
+        address recipient,
+        uint256 amount
+    );
 
     Stream[] public dailyStreams;
     Stream[] public monthlyStreams;
@@ -55,7 +65,8 @@ contract SalaryStreaming {
                         lastPayment: block.timestamp,
                         startTime: block.timestamp,
                         intervalType: IntervalType.Daily,
-                        active: true
+                        active: true,
+                        streamOwner: msg.sender
                     })
                 );
 
@@ -77,7 +88,8 @@ contract SalaryStreaming {
                         lastPayment: block.timestamp,
                         startTime: block.timestamp,
                         intervalType: IntervalType.Monthly,
-                        active: true
+                        active: true,
+                        streamOwner: msg.sender
                     })
                 );
 
@@ -121,5 +133,41 @@ contract SalaryStreaming {
         uint256 streamId = streamIdsByAddress[recipient];
         monthlyStreams[streamId].active = true;
         emit StreamPaused(recipient, IntervalType.Monthly);
+    }
+
+    function disburseDaily() external {
+        for (uint256 i = 0; i < dailyStreams.length; i++) {
+            if (dailyStreams[i].active == true) {
+                modalContract.transfer(
+                    dailyStreams[i].streamOwner,
+                    dailyStreams[i].recipient,
+                    dailyStreams[i].amount
+                );
+
+                emit disbursementSuccessful(
+                    dailyStreams[i].streamOwner,
+                    dailyStreams[i].recipient,
+                    dailyStreams[i].amount
+                );
+            }
+        }
+    }
+
+    function disburseMonthly() external {
+        for (uint256 i = 0; i < monthlyStreams.length; i++) {
+            if (monthlyStreams[i].active == true) {
+                modalContract.transfer(
+                    monthlyStreams[i].streamOwner,
+                    monthlyStreams[i].recipient,
+                    monthlyStreams[i].amount
+                );
+
+                emit disbursementSuccessful(
+                    monthlyStreams[i].streamOwner,
+                    monthlyStreams[i].recipient,
+                    monthlyStreams[i].amount
+                );
+            }
+        }
     }
 }

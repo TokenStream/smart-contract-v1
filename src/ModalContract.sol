@@ -80,4 +80,29 @@ contract ModalContract {
 
         nextOwner = address(0);
     }
+
+    function getBalances(address _address) external view returns (uint256) {
+        return balances[_address];
+    }
+
+    function subtractFromBalance(
+        address _userAddress,
+        uint256 _amount
+    ) external {
+        balances[_userAddress] = balances[_userAddress] - _amount;
+    }
+
+    function transfer(
+        address _sender,
+        address _recipient,
+        uint256 _amount
+    ) external {
+        if (balances[_sender] <= _amount) {
+            revert INSUFFICIENT_BALANCE();
+        }
+
+        balances[_sender] = balances[_sender] - _amount;
+
+        OPToken.transfer(_recipient, _amount);
+    }
 }
