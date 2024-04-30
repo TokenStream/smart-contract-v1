@@ -46,11 +46,15 @@ contract SubscriptionService {
     }
 
     //create a subscription plan
-    function addSubscriptionPlan(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
-        external
-        onlyOwner
-    {
-        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true));
+    function addSubscriptionPlan(
+        string memory _name,
+        uint256 _fee,
+        uint256 _interval,
+        address _paymentAddress
+    ) external onlyOwner {
+        plans.push(
+            SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true)
+        );
     }
 
     //change an existing plan
@@ -62,15 +66,27 @@ contract SubscriptionService {
         address _paymentAddress
     ) external onlyOwner {
         require(planId < plans.length, "Invalid plan ID");
-        plans[planId] = SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true);
+        plans[planId] = SubscriptionPlan(
+            _name,
+            _fee,
+            _interval,
+            _paymentAddress,
+            true
+        );
     }
 
     //subscribe to an existing plan
     function startSubscription(uint256 planId) public {
         require(planId < plans.length, "Invalid plan ID");
         require(plans[planId].active, "Plan is not active"); // Check if the plan is active
-        require(!activeSubscriptions[msg.sender][planId], "Already subscribed to this plan");
-        require(balances[msg.sender] >= plans[planId].fee, "Insufficient funds");
+        require(
+            !activeSubscriptions[msg.sender][planId],
+            "Already subscribed to this plan"
+        );
+        require(
+            balances[msg.sender] >= plans[planId].fee,
+            "Insufficient funds"
+        );
 
         SubscriptionPlan memory plan = plans[planId];
         address _paymentAddress = plan.paymentAddress;
@@ -94,7 +110,10 @@ contract SubscriptionService {
     //resume a subscription
     function resumeSubscription(uint256 planId) external {
         require(!activeSubscriptions[msg.sender][planId], "Already active");
-        require(!stoppedSubscriptions[msg.sender][planId], "Subscription has been stopped");
+        require(
+            !stoppedSubscriptions[msg.sender][planId],
+            "Subscription has been stopped"
+        );
         activeSubscriptions[msg.sender][planId] = true;
         emit SubscriptionResumed(msg.sender, planId);
     }
@@ -114,24 +133,35 @@ contract SubscriptionService {
     }
 
     //users customize their subscription
-    function createCustomSubscription(string memory _name, uint256 _fee, uint256 _interval, address _paymentAddress)
-        external
-    {
+    function createCustomSubscription(
+        string memory _name,
+        uint256 _fee,
+        uint256 _interval,
+        address _paymentAddress
+    ) external {
         // Add the custom subscription plan
         uint256 planId = plans.length;
-        plans.push(SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true));
+        plans.push(
+            SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true)
+        );
 
         // Start the subscription for the user
         startSubscription(planId);
     }
 
     //all subcriptions for a specific user
-    function getUserSubscriptions(address user) external view returns (uint256[] memory) {
+    function getUserSubscriptions(
+        address user
+    ) external view returns (uint256[] memory) {
         return subscribers[user].subscriptionIds;
     }
 
     //all available subscriptions
-    function getAllSubscriptionPlans() external view returns (SubscriptionPlan[] memory) {
+    function getAllSubscriptionPlans()
+        external
+        view
+        returns (SubscriptionPlan[] memory)
+    {
         return plans;
     }
 }
