@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {ModalContract} from "../src/ModalContract.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 contract SalaryStreaming {
+    ModalContract public modalContract;
+    IERC20 public OPToken;
+
     enum IntervalType {
         None,
         Daily,
@@ -22,6 +28,12 @@ contract SalaryStreaming {
         uint256 indexed streamId,
         address indexed recipient,
         IntervalType intervalType
+    );
+
+    event disbursementSuccessful(
+        address indexed sender,
+        address indexed recipient,
+        uint amount
     );
 
     event StreamPaused(address indexed recipient, IntervalType intervalType);
@@ -99,83 +111,63 @@ contract SalaryStreaming {
         return monthlyStreams;
     }
 
-    function pauseStream(
-        address recipient,
-        IntervalType intervalType
-    ) external {
-        if (intervalType == IntervalType.Daily) {
-            for (uint256 i = 0; i < dailyStreams.length; i++) {
-                if (
-                    dailyStreams[i].recipient == recipient &&
-                    dailyStreams[i].active
-                ) {
-                    dailyStreams[i].active = false;
-                    emit StreamPaused(recipient, IntervalType.Daily);
-                    break;
-                }
-            }
-        } else if (intervalType == IntervalType.Monthly) {
-            for (uint256 i = 0; i < monthlyStreams.length; i++) {
-                if (
-                    monthlyStreams[i].recipient == recipient &&
-                    monthlyStreams[i].active
-                ) {
-                    monthlyStreams[i].active = false;
-                    emit StreamPaused(recipient, IntervalType.Monthly);
-                    break;
-                }
+    function stopDailyStream(address recipient) external {
+        uint256 streamId = streamIdsByAddress[recipient];
+        dailyStreams[streamId].active = false;
+        emit StreamPaused(recipient, IntervalType.Daily);
+    }
+
+    function stopMonthlyStream(address recipient) external {
+        uint256 streamId = streamIdsByAddress[recipient];
+        monthlyStreams[streamId].active = false;
+        emit StreamPaused(recipient, IntervalType.Monthly);
+    }
+
+    function resumeDailyStream(address recipient) external {
+        uint256 streamId = streamIdsByAddress[recipient];
+        dailyStreams[streamId].active = true;
+        emit StreamPaused(recipient, IntervalType.Daily);
+    }
+
+    function resumeMonthlyStream(address recipient) external {
+        uint256 streamId = streamIdsByAddress[recipient];
+        monthlyStreams[streamId].active = true;
+        emit StreamPaused(recipient, IntervalType.Monthly);
+    }
+
+    function disburseDaily() external {
+        for (i = 0; i < dailyStreams.length; i++) {
+            if (dailyStreams[i].active == true) {
+                OPToken.transfer(
+                    address(modalContract),
+                    dailyStreams[i].recipient,
+                    dailyStreams[i].amount
+                );
+
+                emit disbursementSuccessful(
+                    address(modalContract),
+                    address(recipient),
+                    amount
+                );
             }
         }
     }
 
-    function resumeStream(
-        address recipient,
-        IntervalType intervalType
-    ) external {
-        if (intervalType == IntervalType.Daily) {
-            for (uint256 i = 0; i < dailyStreams.length; i++) {
-                if (
-                    dailyStreams[i].recipient == recipient &&
-                    !dailyStreams[i].active
-                ) {
-                    dailyStreams[i].active = true;
-                    emit StreamResumed(recipient, IntervalType.Daily);
-                    break;
-                }
-            }
-        } else if (intervalType == IntervalType.Monthly) {
-            for (uint256 i = 0; i < monthlyStreams.length; i++) {
-                if (
-                    monthlyStreams[i].recipient == recipient &&
-                    !monthlyStreams[i].active
-                ) {
-                    monthlyStreams[i].active = true;
-                    emit StreamResumed(recipient, IntervalType.Monthly);
-                    break;
-                }
-            }
-        }
-    }
+    function disburseMonthly() external {
+        for (i = 0; i < dailyStreams.length; i++) {
+            if (dailyStreams[i].active == true) {
+                OPToken.transfer(
+                    address(modalContract),
+                    monthlyStreams[i].recipient,
+                    monthlyStreams[i].amount
+                );
 
-    function stopStream(address recipient, IntervalType intervalType) external {
-        if (intervalType == IntervalType.Daily) {
-            for (uint256 i = 0; i < dailyStreams.length; i++) {
-                if (
-                    dailyStreams[i].recipient == recipient &&
-                    dailyStreams[i].active
-                ) {
-                    dailyStreams[i].active = false;
-                    emit StreamStopped(recipient, IntervalType.Monthly);
-                    break;
-                }
+                emit disbursementSuccessful(
+                    address(modalContract),
+                    address(recipient),
+                    amount
+                );
             }
         }
     }
 }
-// [["0xb9a00a47c522f6ec6b257c545542361c00f02fcd",100],["0x742d35Cc6634C0532925a3b844Bc454e4438f44e",200]]
-// [["0x27d8d15cbc94527cadf5ec14b69519ae23288b95",100],["0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C",200]]
-// 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
-// 0x5aeda56215b167893e80b4fe645ba6d5bab767de
-// 0x27d8d15cbc94527cadf5ec14b69519ae23288b95
-// 0x78731d3Ca6b7e34aC0F824c42a7cC18A495cabaB
-// 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C
