@@ -1,13 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ModalContract} from "../src/ModalContract.sol";
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-
 contract SalaryStreaming {
-    ModalContract public modalContract;
-    IERC20 public OPToken;
-
     enum IntervalType {
         None,
         Daily,
@@ -28,12 +22,6 @@ contract SalaryStreaming {
         uint256 indexed streamId,
         address indexed recipient,
         IntervalType intervalType
-    );
-
-    event disbursementSuccessful(
-        address indexed sender,
-        address indexed recipient,
-        uint amount
     );
 
     event StreamPaused(address indexed recipient, IntervalType intervalType);
@@ -133,41 +121,5 @@ contract SalaryStreaming {
         uint256 streamId = streamIdsByAddress[recipient];
         monthlyStreams[streamId].active = true;
         emit StreamPaused(recipient, IntervalType.Monthly);
-    }
-
-    function disburseDaily() external {
-        for (i = 0; i < dailyStreams.length; i++) {
-            if (dailyStreams[i].active == true) {
-                OPToken.transfer(
-                    address(modalContract),
-                    dailyStreams[i].recipient,
-                    dailyStreams[i].amount
-                );
-
-                emit disbursementSuccessful(
-                    address(modalContract),
-                    address(recipient),
-                    amount
-                );
-            }
-        }
-    }
-
-    function disburseMonthly() external {
-        for (i = 0; i < dailyStreams.length; i++) {
-            if (dailyStreams[i].active == true) {
-                OPToken.transfer(
-                    address(modalContract),
-                    monthlyStreams[i].recipient,
-                    monthlyStreams[i].amount
-                );
-
-                emit disbursementSuccessful(
-                    address(modalContract),
-                    address(recipient),
-                    amount
-                );
-            }
-        }
     }
 }
