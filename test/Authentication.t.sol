@@ -5,7 +5,7 @@ import "../lib/forge-std/src/Test.sol";
 import "../src/Authentication.sol";
 
 contract AuthenticationTest is Test {
-    Authentication public auth;
+    Authentication auth;
 
     function setUp() public {
         auth = new Authentication();
