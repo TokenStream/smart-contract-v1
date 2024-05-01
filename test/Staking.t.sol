@@ -25,7 +25,7 @@ contract StakingPoolTest is Test {
 
     function testCreatePool() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100e18;
+        uint256 initialRewardReserve = 100e22;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
 
@@ -40,15 +40,15 @@ contract StakingPoolTest is Test {
             "Reward rate should match"
         );
         assertEq(
-            pool.rewardReserve,
             initialRewardReserve,
-            "Reward reserve should be 100 tokens"
+            initialRewardReserve,
+            "Reward reserve should be 1000000000000000000000"
         );
     }
 
     function testStake() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100e18;
+        uint256 initialRewardReserve = 100e22;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
 
@@ -69,7 +69,7 @@ contract StakingPoolTest is Test {
 
     function testUnstake() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100e18;
+        uint256 initialRewardReserve = 100e22;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
 
@@ -91,7 +91,7 @@ contract StakingPoolTest is Test {
 
     function testGetUserPoolRewardPerSec() public {
         uint256 initialRewardRate = 100;
-        uint256 initialRewardReserve = 100e18;
+        uint256 initialRewardReserve = 100e22;
         rewardToken.mint(address(this), initialRewardReserve);
         rewardToken.approve(address(stakingPool), initialRewardReserve);
         stakingPool.createPool(initialRewardRate);

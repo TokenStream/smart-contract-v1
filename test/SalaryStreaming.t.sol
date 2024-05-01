@@ -18,7 +18,7 @@
 
 //     function testCreateStream() public {
 //         salaryStreaming.createStream(
-//             [SalaryStreaming.StreamDetails(recipient, amount)],
+//             [salaryStreaming.StreamDetails(recipient, amount)],
 //             intervalType
 //         );
 //         assertEq(salaryStreaming.getAllDailyStreams().length, 1);
