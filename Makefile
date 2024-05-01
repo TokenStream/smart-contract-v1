@@ -32,3 +32,12 @@ deploySalaryStreaming:
     --etherscan-api-key ${ETHERSCAN_API_KEY} \
     --verify \
     src/SalaryStreaming.sol:SalaryStreaming
+
+
+deployModalContract:
+	forge create --rpc-url ${URL} \
+    --constructor-args $(_TriverToken) $(_OPToken) \
+    --private-key ${PRIVATE_KEY} \
+    --etherscan-api-key ${ETHERSCAN_API_KEY} \
+    --verify \
+    src/ModalContract.sol:ModalContract
