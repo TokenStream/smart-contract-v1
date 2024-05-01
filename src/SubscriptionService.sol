@@ -165,22 +165,6 @@ contract SubscriptionService {
         emit SubscriptionPlanDeactivated(planId); // Emit an event for plan deactivation
     }
 
-    //users customize their subscription
-    function createCustomSubscription(
-        string memory _name,
-        uint256 _fee,
-        uint256 _interval,
-        address _paymentAddress
-    ) external {
-        // Add the custom subscription plan
-        uint256 planId = plans.length;
-        plans.push(
-            SubscriptionPlan(_name, _fee, _interval, _paymentAddress, true)
-        );
-
-        // Start the subscription for the user
-        startSubscription(planId);
-    }
 
     function processSubscriptionPayments() external {
         // Iterate over all active subscriptions for the user
