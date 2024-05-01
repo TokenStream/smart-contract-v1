@@ -39,7 +39,6 @@ contract ModalContract {
         if (OPToken.balanceOf(msg.sender) <= _amount) {
             revert INSUFFICIENT_BALANCE();
         }
-        OPToken.approve(address(this), _amount);
         OPToken.transferFrom(msg.sender, address(this), _amount);
         balances[msg.sender] += _amount;
         emit DepositSuccessiful(msg.sender, _amount);

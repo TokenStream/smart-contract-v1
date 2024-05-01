@@ -2,47 +2,61 @@
 // pragma solidity ^0.8.0;
 
 // import "forge-std/Test.sol";
-// import "../src/SalaryStreaming.sol";
+
+// import {SalaryStreaming} from "../src/SalaryStreaming.sol";
+// import {ModalContract} from "../contracts/ModalContract.sol";
 
 // contract SalaryStreamingTest is Test {
 //     SalaryStreaming public salaryStreaming;
+//     ModalContract public modalContract;
 
-//     address public recipient = address(1);
-//     uint256 public amount = 100;
-//     SalaryStreaming.IntervalType public intervalType =
-//         SalaryStreaming.IntervalType.Daily;
+//     address public recipient1 = address(1);
+//     address public recipient2 = address(2);
+//     address public streamOwner = address(this);
 
 //     function setUp() public {
+//         modalContract = new ModalContract();
 //         salaryStreaming = new SalaryStreaming();
 //     }
 
 //     function testCreateStream() public {
-//         salaryStreaming.createStream(
-//             [salaryStreaming.StreamDetails(recipient, amount)],
-//             intervalType
-//         );
-//         assertEq(salaryStreaming.getAllDailyStreams().length, 1);
-//         assertEq(salaryStreaming.getAllDailyStreams()[0].recipient, recipient);
-//         assertEq(salaryStreaming.getAllDailyStreams()[0].amount, amount);
+//         StreamDetails[] memory streamDetails = [
+//             StreamDetails(recipient1, 100),
+//             StreamDetails(recipient2, 200)
+//         ];..
+
+//         salaryStreaming.createStream(streamDetails, IntervalType.Daily);
+
+//         assertEq(salaryStreaming.dailyStreams.length, 2);
+//         assertEq(salaryStreaming.streamIdsByAddress[recipient1], 0);
+//         assertEq(salaryStreaming.streamIdsByAddress[recipient2], 1);
 //     }
 
-//     function testPauseAndResumeStream() public {
-//         salaryStreaming.createStream(
-//             [salaryStreaming.StreamDetails(recipient, amount)],
-//             intervalType
-//         );
-//         salaryStreaming.stopDailyStream(recipient);
-//         assertEq(salaryStreaming.getAllDailyStreams()[0].active, false);
-//         salaryStreaming.resumeDailyStream(recipient);
-//         assertEq(salaryStreaming.getAllDailyStreams()[0].active, true);
+//     function testStopStream() public {
+//         StreamDetails[] memory streamDetails = [StreamDetails(recipient1, 100)];
+
+//         salaryStreaming.createStream(streamDetails, IntervalType.Daily);
+//         salaryStreaming.stopDailyStream(recipient1);
+
+//         assertEq(salaryStreaming.dailyStreams[0].active, false);
+//     }
+
+//     function testResumeStream() public {
+//         StreamDetails[] memory streamDetails = [StreamDetails(recipient1, 100)];
+
+//         salaryStreaming.createStream(streamDetails, IntervalType.Daily);
+//         salaryStreaming.stopDailyStream(recipient1);
+//         salaryStreaming.resumeDailyStream(recipient1);
+
+//         assertEq(salaryStreaming.dailyStreams[0].active, true);
 //     }
 
 //     function testDisburseDaily() public {
-//         salaryStreaming.createStream(
-//             [salaryStreaming.StreamDetails(recipient, amount)],
-//             intervalType
-//         );
+//         StreamDetails[] memory streamDetails = [StreamDetails(recipient1, 100)];
+
+//         salaryStreaming.createStream(streamDetails, IntervalType.Daily);
 //         salaryStreaming.disburseDaily();
-//         // assert that the disbursement was successful
+
+//         // Assert that the disbursement was successful
 //     }
 // }
