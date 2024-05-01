@@ -126,13 +126,13 @@ contract SalaryStreaming {
     function resumeDailyStream(address recipient) external {
         uint256 streamId = streamIdsByAddress[recipient];
         dailyStreams[streamId].active = true;
-        emit StreamPaused(recipient, IntervalType.Daily);
+        emit StreamResumed(recipient, IntervalType.Daily);
     }
 
     function resumeMonthlyStream(address recipient) external {
         uint256 streamId = streamIdsByAddress[recipient];
         monthlyStreams[streamId].active = true;
-        emit StreamPaused(recipient, IntervalType.Monthly);
+        emit StreamResumed(recipient, IntervalType.Monthly);
     }
 
     function disburseDaily() external {
