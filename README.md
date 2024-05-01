@@ -1,6 +1,4 @@
-## Foundry
-
-```````````````  Token Streaming Application ``````````````
+##  Token Streaming Application 
 
 ````````  Overview  ```````
 This README provides an overview of the Token Streaming Application, which facilitates continuous, real-time transactions of tokens based on predefined criteria. The application focuses on decentralized finance (DeFi), automating various financial processes such as salaries, subscriptions, rewards, and staking payouts without manual intervention.
