@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./ERC20Token.sol";
+import "./TRiverToken.sol";
 import "./Interfaces/IRewardToken.sol";
 
 error ONLY_THE_OWNER_CAN_PERFORM_THIS_ACTION();
 error INSUFFICIENT_BALANCE();
 error YOU_DO_NOT_HAVE_REWARDS();
+error YOU_ARE_NOT_THE_NEXT_OWNER();
 
 contract ModalContract {
     IERC20 public OPToken;
@@ -35,11 +36,11 @@ contract ModalContract {
     }
 
     function deposit(uint256 _amount) external {
-        require(
-            OPToken.balanceOf(msg.sender) >= _amount,
-            "Insufficient balance"
-        );
-        OPToken.transfer(address(this), _amount);
+        if (OPToken.balanceOf(msg.sender) <= _amount) {
+            revert INSUFFICIENT_BALANCE();
+        }
+        OPToken.approve(address(this), _amount);
+        OPToken.transferFrom(msg.sender, address(this), _amount);
         balances[msg.sender] += _amount;
         emit DepositSuccessiful(msg.sender, _amount);
     }
@@ -74,7 +75,10 @@ contract ModalContract {
     }
 
     function claimOwnership() external {
-        require(msg.sender == nextOwner, "not next owner");
+        // require(msg.sender == nextOwner, "not next owner");
+        if (msg.sender != nextOwner) {
+            revert YOU_ARE_NOT_THE_NEXT_OWNER();
+        }
 
         owner = msg.sender;
 

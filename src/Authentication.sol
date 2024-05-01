@@ -14,6 +14,9 @@ contract Authentication {
 
     mapping(address => User) addressToUserInfo;
 
+    // Since bytes cannot be used directly as a key in a mapping,
+    // you might need to use a different approach for nameToAddress.
+    // For simplicity, this example uses a mapping from string to address.
     mapping(string => address) nameToAddress;
 
     User[] public users;
@@ -40,16 +43,22 @@ contract Authentication {
     }
 
     // Utility function to convert bytes to string
-    function bytesToString(bytes memory data) private pure returns (string memory) {
+    function bytesToString(
+        bytes memory data
+    ) private pure returns (string memory) {
         return string(data);
     }
 
-    function getUserInfoFromName(bytes calldata _name) external view returns (User memory) {
+    function getUserInfoFromName(
+        bytes calldata _name
+    ) external view returns (User memory) {
         string memory nameStr = bytesToString(_name);
         return addressToUserInfo[nameToAddress[nameStr]];
     }
 
-    function getAddressFromName(bytes calldata _name) external view returns (address) {
+    function getAddressFromName(
+        bytes calldata _name
+    ) external view returns (address) {
         string memory nameStr = bytesToString(_name);
         return nameToAddress[nameStr];
     }
@@ -61,5 +70,11 @@ contract Authentication {
 
     function getAllUsers() external view returns (User[] memory) {
         return users;
+    }
+
+    function getUserInfo(
+        address _userAddress
+    ) external view returns (User memory) {
+        return addressToUserInfo[_userAddress];
     }
 }
