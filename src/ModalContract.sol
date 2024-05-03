@@ -8,6 +8,7 @@ error ONLY_THE_OWNER_CAN_PERFORM_THIS_ACTION();
 error INSUFFICIENT_BALANCE();
 error YOU_DO_NOT_HAVE_REWARDS();
 error YOU_ARE_NOT_THE_NEXT_OWNER();
+error INSUFFICIENT_ALLOWANCE();
 
 contract ModalContract {
     IERC20 public OPToken;
@@ -36,8 +37,12 @@ contract ModalContract {
     }
 
     function deposit(uint256 _amount) external {
-        if (OPToken.balanceOf(msg.sender) <= _amount) {
-            revert INSUFFICIENT_BALANCE();
+        // if (OPToken.balanceOf(msg.sender) <= _amount) {
+        //     revert INSUFFICIENT_BALANCE();
+        // }
+
+        if (OPToken.allowance(msg.sender, address(this)) < _amount) {
+            revert INSUFFICIENT_ALLOWANCE();
         }
         OPToken.transferFrom(msg.sender, address(this), _amount);
         balances[msg.sender] += _amount;

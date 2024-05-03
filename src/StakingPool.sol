@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract StakingPool {
@@ -25,7 +26,7 @@ contract StakingPool {
         uint256 rewardRate;
     }
 
-    mapping(uint256 => Pool) internal pools;
+    mapping(uint256 => Pool) private pools;
 
     event poolCreated(
         uint256 PoolID,
@@ -59,11 +60,11 @@ contract StakingPool {
 
     function createPool(uint256 _rewardRate) public {
         // widthrawing the 100 pool reward token from the pool creator
-        rewardToken.transferFrom(msg.sender, address(this), 100E18);
+        rewardToken.transferFrom(msg.sender, address(this), 100e18);
         Pool storage p = pools[id];
         p.rewardRate = _rewardRate;
-        p.rewardReserve = 100E18;
-        emit poolCreated(id, 100E18, block.timestamp, msg.sender);
+        p.rewardReserve = 100e18;
+        emit poolCreated(id, 100e18, block.timestamp, msg.sender);
         id++;
     }
 
