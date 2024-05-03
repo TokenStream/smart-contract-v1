@@ -14,7 +14,7 @@ contract ModalContract {
     IRewardToken public TriverToken;
     address public owner;
     address nextOwner;
-    uint256 public constant REWARD_RATE = 5;
+    uint256 public constant DEPOSIT_FEE_PERCENTAGE = 5; // 0.05% fee
 
     event DepositSuccessiful(address indexed user, uint256 _amount);
     event WithdrawalSuccessiful(address indexed user, uint256 _amount);
@@ -36,10 +36,13 @@ contract ModalContract {
     }
 
     function deposit(uint256 _amount) external {
-        if (OPToken.balanceOf(msg.sender) <= _amount) {
+
+        uint256 fee = (_amount * DEPOSIT_FEE_PERCENTAGE) / 10000; // Calculate 0.05% fee
+        uint256 totalAmount = _amount + fee;
+        if (OPToken.balanceOf(msg.sender) <= totalAmount) {
             revert INSUFFICIENT_BALANCE();
         }
-        OPToken.transferFrom(msg.sender, address(this), _amount);
+        OPToken.transferFrom(msg.sender, address(this), totalAmount);
         balances[msg.sender] += _amount;
         emit DepositSuccessiful(msg.sender, _amount);
     }
@@ -54,18 +57,6 @@ contract ModalContract {
         emit WithdrawalSuccessiful(msg.sender, _amount);
     }
 
-    function platformRewards(address _user) external {
-        uint256 userBalance = balances[_user];
-
-        if (userBalance <= 0) {
-            revert YOU_DO_NOT_HAVE_REWARDS();
-        }
-
-        uint256 rewardAmount = (userBalance * REWARD_RATE) / 10000;
-
-        // Transfer the rewards to the user
-        TriverToken.transfer(_user, rewardAmount);
-    }
 
     //change ownership
     function transferOwnership(address _newOwner) external {
