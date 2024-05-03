@@ -37,20 +37,11 @@ contract ModalContract {
     }
 
     function deposit(uint256 _amount) external {
-<<<<<<< HEAD
 
         uint256 fee = (_amount * DEPOSIT_FEE_PERCENTAGE) / 10000; // Calculate 0.05% fee
         uint256 totalAmount = _amount + fee;
         if (OPToken.balanceOf(msg.sender) <= totalAmount) {
             revert INSUFFICIENT_BALANCE();
-=======
-        // if (OPToken.balanceOf(msg.sender) <= _amount) {
-        //     revert INSUFFICIENT_BALANCE();
-        // }
-
-        if (OPToken.allowance(msg.sender, address(this)) < _amount) {
-            revert INSUFFICIENT_ALLOWANCE();
->>>>>>> 2d61f13a66650b5f050d008af71833bc94cbbd65
         }
         OPToken.transferFrom(msg.sender, address(this), totalAmount);
         balances[msg.sender] += _amount;
