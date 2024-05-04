@@ -52,7 +52,8 @@ contract SubscriptionService {
         }
     }
 
-    constructor() {
+    constructor(address _modal) {
+        modalContract = ModalContract(_modal);
         owner = msg.sender;
     }
 
