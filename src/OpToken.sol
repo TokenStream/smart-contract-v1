@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract OpTOken is ERC20 {
+contract OpToken is ERC20 {
     constructor(uint256 initialSupply) ERC20("OpToken", "OP") {
         _mint(msg.sender, initialSupply);
     }

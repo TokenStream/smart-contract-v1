@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ModalContract} from "../src/ModalContract.sol";
+import {ModalContract} from "./ModalContract.sol";
 
 contract SalaryStreaming {
     ModalContract public modalContract;
@@ -47,8 +47,13 @@ contract SalaryStreaming {
     }
 
     mapping(address => uint256) public streamIdsByAddress;
+    mapping(address => Stream[]) public streamsByOwner;
     uint256 private idDailyCounter = 0;
     uint256 private idMonthlyCounter = 0;
+
+    constructor(address _modal) {
+        modalContract = ModalContract(_modal);
+    }
 
     function createStream(
         StreamDetails[] calldata _streamDetails,
@@ -57,20 +62,19 @@ contract SalaryStreaming {
         if (intervalType == IntervalType.Daily) {
             for (uint256 i = 0; i < _streamDetails.length; i++) {
                 uint256 _id = idDailyCounter++;
-                dailyStreams.push(
-                    Stream({
-                        id: _id,
-                        recipient: _streamDetails[i].recipient,
-                        amount: _streamDetails[i].amount,
-                        lastPayment: block.timestamp,
-                        startTime: block.timestamp,
-                        intervalType: IntervalType.Daily,
-                        active: true,
-                        streamOwner: msg.sender
-                    })
-                );
-
+                Stream memory newStream = Stream({
+                    id: _id,
+                    recipient: _streamDetails[i].recipient,
+                    amount: _streamDetails[i].amount,
+                    lastPayment: block.timestamp,
+                    startTime: block.timestamp,
+                    intervalType: IntervalType.Daily,
+                    active: true,
+                    streamOwner: msg.sender
+                });
+                dailyStreams.push(newStream);
                 streamIdsByAddress[_streamDetails[i].recipient] = _id;
+                streamsByOwner[msg.sender].push(newStream);
                 emit StreamCreated(
                     _id,
                     _streamDetails[i].recipient,
@@ -80,20 +84,19 @@ contract SalaryStreaming {
         } else if (intervalType == IntervalType.Monthly) {
             for (uint256 i = 0; i < _streamDetails.length; i++) {
                 uint256 _id = idMonthlyCounter++;
-                monthlyStreams.push(
-                    Stream({
-                        id: _id,
-                        recipient: _streamDetails[i].recipient,
-                        amount: _streamDetails[i].amount,
-                        lastPayment: block.timestamp,
-                        startTime: block.timestamp,
-                        intervalType: IntervalType.Monthly,
-                        active: true,
-                        streamOwner: msg.sender
-                    })
-                );
-
+                Stream memory newStream = Stream({
+                    id: _id,
+                    recipient: _streamDetails[i].recipient,
+                    amount: _streamDetails[i].amount,
+                    lastPayment: block.timestamp,
+                    startTime: block.timestamp,
+                    intervalType: IntervalType.Monthly,
+                    active: true,
+                    streamOwner: msg.sender
+                });
+                monthlyStreams.push(newStream);
                 streamIdsByAddress[_streamDetails[i].recipient] = _id;
+                streamsByOwner[msg.sender].push(newStream);
                 emit StreamCreated(
                     _id,
                     _streamDetails[i].recipient,
@@ -170,4 +173,15 @@ contract SalaryStreaming {
             }
         }
     }
+
+    function getStreamsByOwner(address owner)
+        external
+        view
+        returns (Stream[] memory)
+    {
+        return streamsByOwner[owner];
+    }
 }
+
+
+//  [["0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",100],["0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",200]]

@@ -1,28 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./TRiverToken.sol";
-import "./Interfaces/IRewardToken.sol";
+import "./OpToken.sol";
 
 error ONLY_THE_OWNER_CAN_PERFORM_THIS_ACTION();
 error INSUFFICIENT_BALANCE();
 error YOU_DO_NOT_HAVE_REWARDS();
 error YOU_ARE_NOT_THE_NEXT_OWNER();
+error INSUFFICIENT_ALLOWANCE();
 
 contract ModalContract {
-    IERC20 public OPToken;
-    IRewardToken public TriverToken;
+    OpToken public OPToken;
     address public owner;
     address nextOwner;
-    uint256 public constant REWARD_RATE = 5;
+    uint256 public constant DEPOSIT_FEE_PERCENTAGE = 5; // 0.05% fee
+    uint256 public totalFees;
+
 
     event DepositSuccessiful(address indexed user, uint256 _amount);
     event WithdrawalSuccessiful(address indexed user, uint256 _amount);
 
-    constructor(address _TriverToken, address _OPToken) {
-        OPToken = IERC20(_OPToken);
-        //Initialize token and owner
-        TriverToken = IRewardToken(_TriverToken);
+    constructor(address _OPToken) {
+        OPToken = OpToken(_OPToken);
         owner = msg.sender;
     }
 
@@ -36,12 +35,21 @@ contract ModalContract {
     }
 
     function deposit(uint256 _amount) external {
-        if (OPToken.balanceOf(msg.sender) <= _amount) {
+        uint256 fee = (_amount * DEPOSIT_FEE_PERCENTAGE) / 1000; // Calculate 0.05% fee
+        uint256 amountAfterFee = _amount - fee;
+
+        if (OPToken.balanceOf(msg.sender) < _amount) {
             revert INSUFFICIENT_BALANCE();
         }
-        OPToken.approve(address(this), _amount);
-        OPToken.transferFrom(msg.sender, address(this), _amount);
-        balances[msg.sender] += _amount;
+
+        // Transfer the fee to the contract
+        OPToken.transferFrom(msg.sender, address(this), fee);
+        totalFees += fee;
+        balances[address(this)] += fee;
+
+        // Transfer the remaining amount after deducting the fee
+        OPToken.transferFrom(msg.sender, address(this), amountAfterFee);
+        balances[msg.sender] += amountAfterFee;
         emit DepositSuccessiful(msg.sender, _amount);
     }
 
@@ -53,19 +61,6 @@ contract ModalContract {
         balances[msg.sender] - _amount;
         OPToken.transfer(msg.sender, _amount);
         emit WithdrawalSuccessiful(msg.sender, _amount);
-    }
-
-    function platformRewards(address _user) external {
-        uint256 userBalance = balances[_user];
-
-        if (userBalance <= 0) {
-            revert YOU_DO_NOT_HAVE_REWARDS();
-        }
-
-        uint256 rewardAmount = (userBalance * REWARD_RATE) / 10000;
-
-        // Transfer the rewards to the user
-        TriverToken.transfer(_user, rewardAmount);
     }
 
     //change ownership
@@ -89,10 +84,9 @@ contract ModalContract {
         return balances[_address];
     }
 
-    function subtractFromBalance(
-        address _userAddress,
-        uint256 _amount
-    ) external {
+    function subtractFromBalance(address _userAddress, uint256 _amount)
+        external
+    {
         balances[_userAddress] = balances[_userAddress] - _amount;
     }
 
@@ -108,5 +102,9 @@ contract ModalContract {
         balances[_sender] = balances[_sender] - _amount;
 
         OPToken.transfer(_recipient, _amount);
+    }
+
+    function contractBalance() public view returns (uint256){
+        return OPToken.balanceOf(address(this));
     }
 }

@@ -60,8 +60,7 @@ contract StakingPool {
 
     function createPool(uint256 _rewardRate) public {
         // widthrawing the 100 pool reward token from the pool creator
-        rewardToken.approve(address(this), 10000e18);
-        rewardToken.transferFrom(msg.sender, address(this), 10000e18);
+        rewardToken.transferFrom(msg.sender, address(this), 100e18);
         Pool storage p = pools[id];
         p.rewardRate = _rewardRate;
         p.rewardReserve = 100e18;
@@ -82,7 +81,6 @@ contract StakingPool {
 
     function stake(uint256 _poolID, uint256 _amount) external {
         Pool storage p = pools[_poolID];
-        stakeToken.approve(address(this), _amount);
         stakeToken.transferFrom(msg.sender, address(this), _amount);
         // calculate the user's reward up until this moment and add it to storedReward;
         uint256 userPreviousBalance = p.stakersBalances[msg.sender];
