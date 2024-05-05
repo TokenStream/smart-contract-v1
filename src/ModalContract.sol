@@ -16,6 +16,7 @@ contract ModalContract {
     uint256 public constant DEPOSIT_FEE_PERCENTAGE = 5; // 0.05% fee
     uint256 public totalFees;
     uint256 totalDeposit;
+    uint256 totalWithdrawal;
 
 
     event DepositSuccessful(address indexed user, uint256 _amount);
@@ -55,8 +56,8 @@ contract ModalContract {
         if (balances[msg.sender] < _amount) {
             revert INSUFFICIENT_BALANCE();
         }
-        balances[msg.sender] - _amount;
-        OPToken.transfer(msg.sender, _amount);
+      balances[msg.sender] -= _amount;
+      totalWithdrawal -= _amount;        OPToken.transfer(msg.sender, _amount);
         emit WithdrawalSuccessiful(msg.sender, _amount);
     }
 
