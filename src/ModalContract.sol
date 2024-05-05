@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./OpToken.sol";
+import  "./OpToken.sol";
 
 error ONLY_THE_OWNER_CAN_PERFORM_THIS_ACTION();
 error INSUFFICIENT_BALANCE();
@@ -15,9 +15,10 @@ contract ModalContract {
     address nextOwner;
     uint256 public constant DEPOSIT_FEE_PERCENTAGE = 5; // 0.05% fee
     uint256 public totalFees;
+    uint256 totalDeposit;
 
 
-    event DepositSuccessiful(address indexed user, uint256 _amount);
+    event DepositSuccessful(address indexed user, uint256 _amount);
     event WithdrawalSuccessiful(address indexed user, uint256 _amount);
 
     constructor(address _OPToken) {
@@ -35,22 +36,18 @@ contract ModalContract {
     }
 
     function deposit(uint256 _amount) external {
-        uint256 fee = (_amount * DEPOSIT_FEE_PERCENTAGE) / 1000; // Calculate 0.05% fee
-        uint256 amountAfterFee = _amount - fee;
+      if (OPToken.balanceOf(msg.sender) < _amount) {
+         revert INSUFFICIENT_BALANCE();
+      }
 
-        if (OPToken.balanceOf(msg.sender) < _amount) {
-            revert INSUFFICIENT_BALANCE();
-        }
+      OPToken.transferFrom(msg.sender, address(this), _amount);
+      balances[msg.sender] += _amount;
+      totalDeposit += _amount;
+      emit DepositSuccessful(msg.sender, _amount);
+    }
 
-        // Transfer the fee to the contract
-        OPToken.transferFrom(msg.sender, address(this), fee);
-        totalFees += fee;
-        balances[address(this)] += fee;
-
-        // Transfer the remaining amount after deducting the fee
-        OPToken.transferFrom(msg.sender, address(this), amountAfterFee);
-        balances[msg.sender] += amountAfterFee;
-        emit DepositSuccessiful(msg.sender, _amount);
+    function getTotalDeposit() external view returns(uint256){
+        return totalDeposit;
     }
 
     // Function to withdraw from the contract
@@ -107,4 +104,9 @@ contract ModalContract {
     function contractBalance() public view returns (uint256){
         return OPToken.balanceOf(address(this));
     }
+
+    function balancePlus(address _add, uint256 _amount) external {
+        balances[_add] =balances[_add]+_amount;
+    }
+
 }
