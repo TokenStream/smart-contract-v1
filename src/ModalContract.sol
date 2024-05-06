@@ -18,6 +18,9 @@ contract ModalContract {
     uint256 totalDeposit;
     uint256 totalWithdrawal;
 
+    mapping(address => uint256) public depositedAmounts;
+
+
 
     event DepositSuccessful(address indexed user, uint256 _amount);
     event WithdrawalSuccessiful(address indexed user, uint256 _amount);
@@ -43,6 +46,7 @@ contract ModalContract {
 
       OPToken.transferFrom(msg.sender, address(this), _amount);
       balances[msg.sender] += _amount;
+      depositedAmounts[msg.sender] += _amount;
       totalDeposit += _amount;
       emit DepositSuccessful(msg.sender, _amount);
     }
@@ -51,15 +55,21 @@ contract ModalContract {
         return totalDeposit;
     }
 
-    // Function to withdraw from the contract
-    function withdraw(uint256 _amount) external {
-        if (balances[msg.sender] < _amount) {
-            revert INSUFFICIENT_BALANCE();
-        }
-      balances[msg.sender] -= _amount;
-      totalWithdrawal -= _amount;        OPToken.transfer(msg.sender, _amount);
-        emit WithdrawalSuccessiful(msg.sender, _amount);
+    function getTotalWithdrawal() external view returns(uint256){
+        return totalWithdrawal;
     }
+
+    // Function to withdraw from the contract
+function withdraw(uint256 _amount) external {
+    if (balances[msg.sender] < _amount || depositedAmounts[msg.sender] < _amount) {
+        revert INSUFFICIENT_BALANCE();
+    }
+    // balances[msg.sender] -= _amount;
+    totalWithdrawal += _amount;
+    depositedAmounts[msg.sender] -= _amount;
+    OPToken.transfer(address(this), _amount);
+    emit WithdrawalSuccessiful(msg.sender, _amount);
+}
 
     //change ownership
     function transferOwnership(address _newOwner) external {
@@ -103,11 +113,16 @@ contract ModalContract {
     }
 
     function contractBalance() public view returns (uint256){
-        return OPToken.balanceOf(address(this));
+        return balances[address(this)];
     }
 
     function balancePlus(address _add, uint256 _amount) external {
         balances[_add] =balances[_add]+_amount;
     }
+
+        function depositBalance() public view returns (uint256){
+        return OPToken.balanceOf(address(this));
+    }
+
 
 }
