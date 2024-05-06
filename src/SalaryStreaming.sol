@@ -38,7 +38,6 @@ contract SalaryStreaming {
         uint256 amount
     );
 
-    uint256 public constant DEPOSIT_FEE_PERCENTAGE = 5; // 0.05% fee
     uint256 public totalFees;
 
     Stream[] public dailyStreams;
@@ -66,15 +65,13 @@ contract SalaryStreaming {
     uint256 fees = 5;
     if (intervalType == IntervalType.Daily) {
         for (uint256 i = 0; i < _streamDetails.length; i++) {
-            // uint256 fee = (_streamDetails[i].amount * 10) / 100; // Calculate 10% fee
-            // uint256 amountAfterFee = _streamDetails[i].amount - fee;
 
             idMonthlyCounter++;
             uint256 _id = idMonthlyCounter;
             Stream memory newStream = Stream({
                 id: _id,
                 recipient: _streamDetails[i].recipient,
-                amount: _streamDetails[i].amount, // Use amountAfterFee instead of _streamDetails[i].amount
+                amount: _streamDetails[i].amount,
                 lastPayment: block.timestamp,
                 startTime: block.timestamp,
                 intervalType: IntervalType.Daily,
@@ -84,8 +81,7 @@ contract SalaryStreaming {
             dailyStreams.push(newStream);
             streamIdsByAddress[_streamDetails[i].recipient] = _id;
             streamsByOwner[msg.sender].push(newStream);
-            // modalContract.subtractFromBalance(msg.sender, fees);
-            // modalContract.balancePlus(address(modalContract),fees);
+
             emit StreamCreated(
                 _id,
                 _streamDetails[i].recipient,
@@ -94,15 +90,13 @@ contract SalaryStreaming {
         }
     } else if (intervalType == IntervalType.Monthly) {
         for (uint256 i = 0; i < _streamDetails.length; i++) {
-            // uint256 fee = (_streamDetails[i].amount * 10) / 100; // Calculate 10% fee
-            // uint256 amountAfterFee = _streamDetails[i].amount - fee;
 
             idMonthlyCounter++;
             uint256 _id = idMonthlyCounter;
             Stream memory newStream = Stream({
                 id: _id,
                 recipient: _streamDetails[i].recipient,
-                amount: _streamDetails[i].amount, // Use amountAfterFee instead of _streamDetails[i].amount
+                amount: _streamDetails[i].amount, 
                 lastPayment: block.timestamp,
                 startTime: block.timestamp,
                 intervalType: IntervalType.Monthly,
@@ -121,7 +115,6 @@ contract SalaryStreaming {
     }
 
             modalContract.subtractFromBalance(msg.sender, fees);
-
 
             modalContract.balancePlus(address(modalContract),fees);
 

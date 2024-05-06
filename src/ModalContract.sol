@@ -42,7 +42,6 @@ contract ModalContract {
 
       OPToken.transferFrom(msg.sender, address(this), _amount);
       balances[msg.sender] += _amount;
-      balances[msg.sender] += _amount;
       totalDeposit += _amount;
       emit DepositSuccessful(msg.sender, _amount);
     }
