@@ -18,10 +18,6 @@ contract ModalContract {
     uint256 totalDeposit;
     uint256 totalWithdrawal;
 
-    mapping(address => uint256) public depositedAmounts;
-
-
-
     event DepositSuccessful(address indexed user, uint256 _amount);
     event WithdrawalSuccessiful(address indexed user, uint256 _amount);
 
@@ -46,7 +42,7 @@ contract ModalContract {
 
       OPToken.transferFrom(msg.sender, address(this), _amount);
       balances[msg.sender] += _amount;
-      depositedAmounts[msg.sender] += _amount;
+      balances[msg.sender] += _amount;
       totalDeposit += _amount;
       emit DepositSuccessful(msg.sender, _amount);
     }
@@ -61,12 +57,11 @@ contract ModalContract {
 
     // Function to withdraw from the contract
 function withdraw(uint256 _amount) external {
-    if (balances[msg.sender] < _amount || depositedAmounts[msg.sender] < _amount) {
+    if (balances[msg.sender] < _amount || balances[msg.sender] < _amount) {
         revert INSUFFICIENT_BALANCE();
     }
-    // balances[msg.sender] -= _amount;
     totalWithdrawal += _amount;
-    depositedAmounts[msg.sender] -= _amount;
+    balances[msg.sender] -= _amount;
     OPToken.transfer(address(this), _amount);
     emit WithdrawalSuccessiful(msg.sender, _amount);
 }
@@ -78,7 +73,6 @@ function withdraw(uint256 _amount) external {
     }
 
     function claimOwnership() external {
-        // require(msg.sender == nextOwner, "not next owner");
         if (msg.sender != nextOwner) {
             revert YOU_ARE_NOT_THE_NEXT_OWNER();
         }
@@ -123,6 +117,5 @@ function withdraw(uint256 _amount) external {
         function depositBalance() public view returns (uint256){
         return OPToken.balanceOf(address(this));
     }
-
-
 }
+
