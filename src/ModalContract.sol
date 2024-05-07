@@ -13,7 +13,6 @@ contract ModalContract {
     IERC20 public OPToken;
     address public owner;
     address nextOwner;
-    uint256 public constant DEPOSIT_FEE_PERCENTAGE = 5; // 0.05% fee
     uint256 public totalFees;
     uint256 totalDeposit;
     uint256 totalWithdrawal;

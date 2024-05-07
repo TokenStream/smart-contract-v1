@@ -33,6 +33,9 @@ contract SubscriptionService {
         uint256[] subscriptionIds;
     }
 
+    uint256 public fees = 3e18;
+
+
     SubscriptionPlan[] plans;
     mapping(address => Subscriber) subscribers;
     mapping(address => uint256) public balances; // user balance in the contract
@@ -94,34 +97,36 @@ contract SubscriptionService {
     }
 
     //subscribe to an existing plan
-    function startSubscription(uint256 planId) public {
-        if (planId >= plans.length) {
-            revert INVALID_PLAN_ID();
-        }
-
-        if (!plans[planId].active) {
-            revert PLAN_IS_NOT_ACTIVE();
-        }
-
-        if (activeSubscriptions[msg.sender][planId]) {
-            revert ALREADY_SUBSCRIBED_TO_THIS_PLAN();
-        }
-
-        if (modalContract.getBalances(msg.sender) <= plans[planId].fee) {
-            revert INSUFFICIENT_FUNDS();
-        }
-
-        SubscriptionPlan memory plan = plans[planId];
-        address _paymentAddress = plan.paymentAddress;
-
-        modalContract.subtractFromBalance(msg.sender, plan.fee);
-        modalContract.transfer(msg.sender, _paymentAddress, plan.fee);
-
-        subscribers[msg.sender].subscriptionIds.push(planId);
-        activeSubscriptions[msg.sender][planId] = true;
-
-        emit SubscriptionStarted(msg.sender, planId);
+function startSubscription(uint256 planId) public {
+    if (planId >= plans.length) {
+        revert INVALID_PLAN_ID();
     }
+
+    if (!plans[planId].active) {
+        revert PLAN_IS_NOT_ACTIVE();
+    }
+
+    if (activeSubscriptions[msg.sender][planId]) {
+        revert ALREADY_SUBSCRIBED_TO_THIS_PLAN();
+    }
+
+    if (modalContract.getBalances(msg.sender) <= plans[planId].fee) {
+        revert INSUFFICIENT_FUNDS();
+    }
+
+    SubscriptionPlan memory plan = plans[planId];
+    address _paymentAddress = plan.paymentAddress;
+
+    // Deduct the fee from the user's balance
+    modalContract.subtractFromBalance(msg.sender, fees);
+    modalContract.balancePlus(address(modalContract), fees);
+
+
+    subscribers[msg.sender].subscriptionIds.push(planId);
+    activeSubscriptions[msg.sender][planId] = true;
+
+    emit SubscriptionStarted(msg.sender, planId);
+}
 
     //pause a subscription
     function pauseSubscription(uint256 planId) external {
