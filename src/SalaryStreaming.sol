@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {ModalContract} from "./ModalContract.sol";
+import "./ModalContract.sol";
 
 contract SalaryStreaming {
     ModalContract public modalContract;
@@ -28,7 +28,6 @@ contract SalaryStreaming {
         address indexed recipient,
         IntervalType intervalType
     );
-
     event StreamPaused(address indexed recipient, IntervalType intervalType);
     event StreamResumed(address indexed recipient, IntervalType intervalType);
     event StreamStopped(address indexed recipient, IntervalType intervalType);
@@ -38,7 +37,7 @@ contract SalaryStreaming {
         uint256 amount
     );
 
-    uint256 public totalFees;
+    uint256 public fees = 3e18;
 
     Stream[] public dailyStreams;
     Stream[] public monthlyStreams;
@@ -57,68 +56,64 @@ contract SalaryStreaming {
         modalContract = ModalContract(_modal);
     }
 
+    function createStream(
+        StreamDetails[] calldata _streamDetails,
+        IntervalType intervalType
+    ) external {
 
-       function createStream(
-    StreamDetails[] calldata _streamDetails,
-    IntervalType intervalType
-) external {
-    uint256 fees = 5;
-    if (intervalType == IntervalType.Daily) {
-        for (uint256 i = 0; i < _streamDetails.length; i++) {
+        if (intervalType == IntervalType.Daily) {
+            for (uint256 i = 0; i < _streamDetails.length; i++) {
+                uint256 _id = idMonthlyCounter;
+                Stream memory newStream = Stream({
+                    id: _id,
+                    recipient: _streamDetails[i].recipient,
+                    amount: _streamDetails[i].amount,
+                    lastPayment: block.timestamp,
+                    startTime: block.timestamp,
+                    intervalType: IntervalType.Daily,
+                    active: true,
+                    streamOwner: msg.sender
+                });
+                dailyStreams.push(newStream);
+                streamIdsByAddress[_streamDetails[i].recipient] = _id;
+                streamsByOwner[msg.sender].push(newStream);
 
-            idMonthlyCounter++;
-            uint256 _id = idMonthlyCounter;
-            Stream memory newStream = Stream({
-                id: _id,
-                recipient: _streamDetails[i].recipient,
-                amount: _streamDetails[i].amount,
-                lastPayment: block.timestamp,
-                startTime: block.timestamp,
-                intervalType: IntervalType.Daily,
-                active: true,
-                streamOwner: msg.sender
-            });
-            dailyStreams.push(newStream);
-            streamIdsByAddress[_streamDetails[i].recipient] = _id;
-            streamsByOwner[msg.sender].push(newStream);
-
-            emit StreamCreated(
-                _id,
-                _streamDetails[i].recipient,
-                IntervalType.Daily
-            );
+                emit StreamCreated(
+                    _id,
+                    _streamDetails[i].recipient,
+                    IntervalType.Daily
+                );
+                idMonthlyCounter++;
+            }
+        } else if (intervalType == IntervalType.Monthly) {
+            for (uint256 i = 0; i < _streamDetails.length; i++) {
+                uint256 _id = idMonthlyCounter;
+                Stream memory newStream = Stream({
+                    id: _id,
+                    recipient: _streamDetails[i].recipient,
+                    amount: _streamDetails[i].amount,
+                    lastPayment: block.timestamp,
+                    startTime: block.timestamp,
+                    intervalType: IntervalType.Monthly,
+                    active: true,
+                    streamOwner: msg.sender
+                });
+                monthlyStreams.push(newStream);
+                streamIdsByAddress[_streamDetails[i].recipient] = _id;
+                streamsByOwner[msg.sender].push(newStream);
+                emit StreamCreated(
+                    _id,
+                    _streamDetails[i].recipient,
+                    IntervalType.Monthly
+                );
+                idMonthlyCounter++; 
+            }
         }
-    } else if (intervalType == IntervalType.Monthly) {
-        for (uint256 i = 0; i < _streamDetails.length; i++) {
 
-            idMonthlyCounter++;
-            uint256 _id = idMonthlyCounter;
-            Stream memory newStream = Stream({
-                id: _id,
-                recipient: _streamDetails[i].recipient,
-                amount: _streamDetails[i].amount, 
-                lastPayment: block.timestamp,
-                startTime: block.timestamp,
-                intervalType: IntervalType.Monthly,
-                active: true,
-                streamOwner: msg.sender
-            });
-            monthlyStreams.push(newStream);
-            streamIdsByAddress[_streamDetails[i].recipient] = _id;
-            streamsByOwner[msg.sender].push(newStream);
-            emit StreamCreated(
-                _id,
-                _streamDetails[i].recipient,
-                IntervalType.Monthly
-            );
-        }
+        modalContract.subtractFromBalance(msg.sender, fees);
+
+        modalContract.balancePlus(address(modalContract), fees);
     }
-
-            modalContract.subtractFromBalance(msg.sender, fees);
-
-            modalContract.balancePlus(address(modalContract),fees);
-
-}
 
     function getAllDailyStreams() external view returns (Stream[] memory) {
         return dailyStreams;
@@ -128,27 +123,31 @@ contract SalaryStreaming {
         return monthlyStreams;
     }
 
-    function stopDailyStream(address recipient) external {
+function stopDailyStream(address recipient) external {
         uint256 streamId = streamIdsByAddress[recipient];
         dailyStreams[streamId].active = false;
+        streamsByOwner[msg.sender][streamId].active = false;
         emit StreamPaused(recipient, IntervalType.Daily);
     }
 
     function stopMonthlyStream(address recipient) external {
         uint256 streamId = streamIdsByAddress[recipient];
         monthlyStreams[streamId].active = false;
+        streamsByOwner[msg.sender][streamId].active = false;
         emit StreamPaused(recipient, IntervalType.Monthly);
     }
 
     function resumeDailyStream(address recipient) external {
         uint256 streamId = streamIdsByAddress[recipient];
         dailyStreams[streamId].active = true;
+        streamsByOwner[msg.sender][streamId].active = true;
         emit StreamResumed(recipient, IntervalType.Daily);
     }
 
     function resumeMonthlyStream(address recipient) external {
         uint256 streamId = streamIdsByAddress[recipient];
         monthlyStreams[streamId].active = true;
+        streamsByOwner[msg.sender][streamId].active = true;
         emit StreamResumed(recipient, IntervalType.Monthly);
     }
 
@@ -196,5 +195,4 @@ contract SalaryStreaming {
         return streamsByOwner[owner];
     }
 }
-
 //  [["0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",100],["0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",200]]
