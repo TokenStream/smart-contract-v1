@@ -156,8 +156,8 @@ function resumeSubscription(uint256 planId) external {
         return plans;
     }
 
-function getSubscriptionsOfAddress(address _add) external view returns (Subscriber[] memory) {
-    return subs[_add];
-}
+    function getSubscriptionsOfAddress(address _add) external view returns (Subscriber[] memory) {
+        return subs[_add];
+    }
     
 }
