@@ -38,7 +38,7 @@ contract SubscriptionService {
 
     mapping(address => Subscriber[]) public subs;
 
-    uint256 public fees = 3e18;
+    uint256 public charges = 1e18;
 
     SubscriptionPlan[] plans;
 
@@ -98,6 +98,11 @@ contract SubscriptionService {
         subArr.push(newSubscriber);
         activeSubscriptions[msg.sender][planId] = true;
         subs[msg.sender].push(newSubscriber);
+
+        modalContract.subtractFromBalance(msg.sender, charges);
+
+        modalContract.balancePlus(address(modalContract), charges);
+
         emit SubscriptionStarted(msg.sender, planId);
     }
     function pauseSubscription(uint256 planId) external {
