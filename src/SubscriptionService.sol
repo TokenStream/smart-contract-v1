@@ -117,21 +117,21 @@ contract SubscriptionService {
     }
 
 
-function resumeSubscription(uint256 planId) external {
-    if (activeSubscriptions[msg.sender][planId]) {
-        revert SUBSCRIPTION_ACTIVE();
-    }
-    if (!stoppedSubscriptions[msg.sender][planId]) {
-        revert SUBSCRIPTION_HAS_NOT_BEEN_STOPPED(); 
-    }
-    activeSubscriptions[msg.sender][planId] = true;
-    // Clear stopped flag
-    stoppedSubscriptions[msg.sender][planId] = false; 
-    subs[msg.sender][planId].active = true;
+    function resumeSubscription(uint256 planId) external {
+        if (activeSubscriptions[msg.sender][planId]) {
+            revert SUBSCRIPTION_ACTIVE();
+        }
+        if (!stoppedSubscriptions[msg.sender][planId]) {
+            revert SUBSCRIPTION_HAS_NOT_BEEN_STOPPED(); 
+        }
+        activeSubscriptions[msg.sender][planId] = true;
+        // Clear stopped flag
+        stoppedSubscriptions[msg.sender][planId] = false; 
+        subs[msg.sender][planId].active = true;
 
 
-    emit SubscriptionResumed(msg.sender, planId);
-}
+        emit SubscriptionResumed(msg.sender, planId);
+    }
 
 
     function deactivateSubscriptionPlan(uint256 planId) external {
