@@ -46,35 +46,51 @@ contract SubscriptionService {
     mapping(address => mapping(uint256 => bool)) public activeSubscriptions;
     mapping(address => mapping(uint256 => bool)) public stoppedSubscriptions;
 
+    event SubscriptionPlanCreated(
+        address creator,
+        uint256 planfee,
+        string planName
+    );
+    event SubscriptionPlanUpdated(
+        address creator,
+        uint256 planfee,
+        string planName
+    );
     event SubscriptionStarted(address indexed subscriber, uint256 planId);
     event SubscriptionPaused(address indexed subscriber, uint256 planId);
     event SubscriptionResumed(address indexed subscriber, uint256 planId);
-    event SubscriptionStopped(address indexed subscriber, uint256 planId);
-    event SubscriptionRenewed(address indexed subscriber, uint256 planId);
+    event SubscriptionPaid(address from, address to, uint256 fee);
     event SubscriptionPlanDeactivated(uint256 planId);
 
-    function onlyOwner() private view {
-        if (msg.sender!= owner) {
-            revert ONLY_THE_ONLY_OWNER_CAN_CALL_THIS_FUNCTION();
-        }
-    }
-
-    constructor(address _modal) {
+    constructor(address _modal, address _paymentAddr) {
         modalContract = ModalContract(_modal);
         owner = msg.sender;
+        paymentAddress = _paymentAddr;
+    }
+
+    function onlyOwner() private view {
+        if (msg.sender != owner) {
+            revert ONLY_THE_ONLY_OWNER_CAN_CALL_THIS_FUNCTION();
+        }
     }
 
     function addSubscriptionPlan(string memory _name, uint256 _fee) external {
         onlyOwner();
         plans.push(SubscriptionPlan(_name, _fee, true));
+        emit SubscriptionPlanCreated(msg.sender, _fee, _name);
     }
 
-    function updateSubscriptionPlan(uint256 planId, string memory _name, uint256 _fee) external {
+    function updateSubscriptionPlan(
+        uint256 planId,
+        string memory _name,
+        uint256 _fee
+    ) external {
         onlyOwner();
         if (planId >= plans.length) {
             revert INVALID_PLAN_ID();
         }
         plans[planId] = SubscriptionPlan(_name, _fee, true);
+        emit SubscriptionPlanUpdated(msg.sender, _fee, _name);
     }
 
     function startSubscription(uint256 planId) public {
@@ -105,34 +121,33 @@ contract SubscriptionService {
 
         emit SubscriptionStarted(msg.sender, planId);
     }
+
     function pauseSubscription(uint256 planId) external {
         if (!activeSubscriptions[msg.sender][planId]) {
             revert SUBSCRIPTION_NOT_ACTIVE();
         }
         activeSubscriptions[msg.sender][planId] = false;
         // Set stopped flag
-        stoppedSubscriptions[msg.sender][planId] = true; 
+        stoppedSubscriptions[msg.sender][planId] = true;
         subs[msg.sender][planId].active = false;
+
         emit SubscriptionPaused(msg.sender, planId);
     }
-
 
     function resumeSubscription(uint256 planId) external {
         if (activeSubscriptions[msg.sender][planId]) {
             revert SUBSCRIPTION_ACTIVE();
         }
         if (!stoppedSubscriptions[msg.sender][planId]) {
-            revert SUBSCRIPTION_HAS_NOT_BEEN_STOPPED(); 
+            revert SUBSCRIPTION_HAS_NOT_BEEN_STOPPED();
         }
         activeSubscriptions[msg.sender][planId] = true;
         // Clear stopped flag
-        stoppedSubscriptions[msg.sender][planId] = false; 
+        stoppedSubscriptions[msg.sender][planId] = false;
         subs[msg.sender][planId].active = true;
-
 
         emit SubscriptionResumed(msg.sender, planId);
     }
-
 
     function deactivateSubscriptionPlan(uint256 planId) external {
         onlyOwner();
@@ -147,17 +162,32 @@ contract SubscriptionService {
         for (uint256 i = 0; i < subArr.length; i++) {
             Subscriber memory subscriber = subArr[i];
             if (subscriber.active) {
-                modalContract.transfer(subscriber.userAddress, paymentAddress, subscriber.fee);
+                modalContract.transfer(
+                    subscriber.userAddress,
+                    paymentAddress,
+                    subscriber.fee
+                );
+
+                emit SubscriptionPaid(
+                    subscriber.userAddress,
+                    paymentAddress,
+                    subscriber.fee
+                );
             }
         }
     }
 
-    function getAllSubscriptionPlans() external view returns (SubscriptionPlan[] memory) {
+    function getAllSubscriptionPlans()
+        external
+        view
+        returns (SubscriptionPlan[] memory)
+    {
         return plans;
     }
 
-    function getSubscriptionsOfAddress(address _add) external view returns (Subscriber[] memory) {
+    function getSubscriptionsOfAddress(
+        address _add
+    ) external view returns (Subscriber[] memory) {
         return subs[_add];
     }
-    
 }
