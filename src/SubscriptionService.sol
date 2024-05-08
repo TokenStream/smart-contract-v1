@@ -110,7 +110,8 @@ contract SubscriptionService {
             revert SUBSCRIPTION_NOT_ACTIVE();
         }
         activeSubscriptions[msg.sender][planId] = false;
-        stoppedSubscriptions[msg.sender][planId] = true; // Set stopped flag
+        // Set stopped flag
+        stoppedSubscriptions[msg.sender][planId] = true; 
         subs[msg.sender][planId].active = false;
         emit SubscriptionPaused(msg.sender, planId);
     }
@@ -121,10 +122,11 @@ function resumeSubscription(uint256 planId) external {
         revert SUBSCRIPTION_ACTIVE();
     }
     if (!stoppedSubscriptions[msg.sender][planId]) {
-        revert SUBSCRIPTION_HAS_NOT_BEEN_STOPPED(); // Changed error message for clarity
+        revert SUBSCRIPTION_HAS_NOT_BEEN_STOPPED(); 
     }
     activeSubscriptions[msg.sender][planId] = true;
-    stoppedSubscriptions[msg.sender][planId] = false; // Clear stopped flag
+    // Clear stopped flag
+    stoppedSubscriptions[msg.sender][planId] = false; 
     subs[msg.sender][planId].active = true;
 
 
