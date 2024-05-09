@@ -63,7 +63,7 @@ contract SalaryStreaming {
 
         if (intervalType == IntervalType.Daily) {
             for (uint256 i = 0; i < _streamDetails.length; i++) {
-                uint256 _id = idMonthlyCounter;
+                uint256 _id = idDailyCounter;
                 Stream memory newStream = Stream({
                     id: _id,
                     recipient: _streamDetails[i].recipient,
@@ -83,7 +83,7 @@ contract SalaryStreaming {
                     _streamDetails[i].recipient,
                     IntervalType.Daily
                 );
-                idMonthlyCounter++;
+                idDailyCounter++;
             }
         } else if (intervalType == IntervalType.Monthly) {
             for (uint256 i = 0; i < _streamDetails.length; i++) {
