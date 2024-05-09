@@ -112,6 +112,7 @@ contract SubscriptionService {
         newSubscriber.name = plans[planId].name;
         newSubscriber.fee = plans[planId].fee;
         newSubscriber.userAddress = msg.sender;
+        newSubscriber.subPlanId = planId;
         subArr.push(newSubscriber);
         activeSubscriptions[msg.sender][planId] = true;
         subs[msg.sender].push(newSubscriber);
