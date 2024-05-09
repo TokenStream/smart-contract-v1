@@ -75,7 +75,7 @@ contract SalaryStreaming {
                     streamOwner: msg.sender
                 });
                 dailyStreams.push(newStream);
-                streamIdsByAddress[_streamDetails[i].recipient] = _id;
+                // streamIdsByAddress[_streamDetails[i].recipient] = _id;
                 streamsByOwner[msg.sender].push(newStream);
 
                 emit StreamCreated(
@@ -99,7 +99,7 @@ contract SalaryStreaming {
                     streamOwner: msg.sender
                 });
                 monthlyStreams.push(newStream);
-                streamIdsByAddress[_streamDetails[i].recipient] = _id;
+                // streamIdsByAddress[_streamDetails[i].recipient] = _id;
                 streamsByOwner[msg.sender].push(newStream);
                 emit StreamCreated(
                     _id,
@@ -123,31 +123,27 @@ contract SalaryStreaming {
         return monthlyStreams;
     }
 
-function stopDailyStream(address recipient) external {
-        uint256 streamId = streamIdsByAddress[recipient];
-        dailyStreams[streamId].active = false;
-        streamsByOwner[msg.sender][streamId].active = false;
+function stopDailyStream(address recipient,uint256 _streamId) external {
+        dailyStreams[_streamId].active = false;
+        streamsByOwner[msg.sender][_streamId].active = false;
         emit StreamPaused(recipient, IntervalType.Daily);
     }
 
-    function stopMonthlyStream(address recipient) external {
-        uint256 streamId = streamIdsByAddress[recipient];
-        monthlyStreams[streamId].active = false;
-        streamsByOwner[msg.sender][streamId].active = false;
+    function stopMonthlyStream(address recipient,uint256 _streamId) external {
+        monthlyStreams[_streamId].active = false;
+        streamsByOwner[msg.sender][_streamId].active = false;
         emit StreamPaused(recipient, IntervalType.Monthly);
     }
 
-    function resumeDailyStream(address recipient) external {
-        uint256 streamId = streamIdsByAddress[recipient];
-        dailyStreams[streamId].active = true;
-        streamsByOwner[msg.sender][streamId].active = true;
+    function resumeDailyStream(address recipient,uint256 _streamId) external {
+        dailyStreams[_streamId].active = true;
+        streamsByOwner[msg.sender][_streamId].active = true;
         emit StreamResumed(recipient, IntervalType.Daily);
     }
 
-    function resumeMonthlyStream(address recipient) external {
-        uint256 streamId = streamIdsByAddress[recipient];
-        monthlyStreams[streamId].active = true;
-        streamsByOwner[msg.sender][streamId].active = true;
+    function resumeMonthlyStream(address recipient,uint256 _streamId) external {
+        monthlyStreams[_streamId].active = true;
+        streamsByOwner[msg.sender][_streamId].active = true;
         emit StreamResumed(recipient, IntervalType.Monthly);
     }
 
