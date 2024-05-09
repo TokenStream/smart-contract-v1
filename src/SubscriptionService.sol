@@ -61,6 +61,7 @@ contract SubscriptionService {
     event SubscriptionResumed(address indexed subscriber, uint256 planId);
     event SubscriptionPaid(address from, address to, uint256 fee);
     event SubscriptionPlanDeactivated(uint256 planId);
+    event SubscriptionPlanActivated(uint256 planId);
 
     constructor(address _modal, address _paymentAddr) {
         modalContract = ModalContract(_modal);
@@ -156,6 +157,15 @@ contract SubscriptionService {
         }
         plans[planId].active = false;
         emit SubscriptionPlanDeactivated(planId);
+    }
+
+    function activateSubscriptionPlan(uint256 planId) external {
+        onlyOwner();
+        if (planId >= plans.length) {
+            revert INVALID_ID_PLAN();
+        }
+        plans[planId].active = true;
+        emit SubscriptionPlanActivated(planId);
     }
 
     function processSubscriptionPayments() external {
