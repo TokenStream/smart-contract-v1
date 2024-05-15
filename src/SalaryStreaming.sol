@@ -42,6 +42,8 @@ contract SalaryStreaming {
     Stream[] public dailyStreams;
     Stream[] public monthlyStreams;
 
+    mapping(uint256 => Stream) public streamsById;
+
     struct StreamDetails {
         address recipient;
         uint256 amount;
@@ -60,7 +62,6 @@ contract SalaryStreaming {
         StreamDetails[] calldata _streamDetails,
         IntervalType intervalType
     ) external {
-
         if (intervalType == IntervalType.Daily) {
             for (uint256 i = 0; i < _streamDetails.length; i++) {
                 uint256 _id = idDailyCounter;
@@ -106,7 +107,7 @@ contract SalaryStreaming {
                     _streamDetails[i].recipient,
                     IntervalType.Monthly
                 );
-                idMonthlyCounter++; 
+                idMonthlyCounter++;
             }
         }
 
@@ -123,28 +124,44 @@ contract SalaryStreaming {
         return monthlyStreams;
     }
 
-function stopDailyStream(address recipient,uint256 _streamId) external {
+    function stopDailyStream(uint256 _streamId) external {
+        require(dailyStreams[_streamId].active, "Stream is not active");
         dailyStreams[_streamId].active = false;
-        streamsByOwner[msg.sender][_streamId].active = false;
-        emit StreamPaused(recipient, IntervalType.Daily);
+        streamsById[dailyStreams[_streamId].id].active = false;
+        emit StreamPaused(
+            dailyStreams[_streamId].recipient,
+            IntervalType.Daily
+        );
     }
 
-    function stopMonthlyStream(address recipient,uint256 _streamId) external {
+    function stopMonthlyStream(uint256 _streamId) external {
+        require(monthlyStreams[_streamId].active, "Stream is not active");
         monthlyStreams[_streamId].active = false;
-        streamsByOwner[msg.sender][_streamId].active = false;
-        emit StreamPaused(recipient, IntervalType.Monthly);
+        streamsById[monthlyStreams[_streamId].id].active = false;
+        emit StreamPaused(
+            monthlyStreams[_streamId].recipient,
+            IntervalType.Monthly
+        );
     }
 
-    function resumeDailyStream(address recipient,uint256 _streamId) external {
+    function resumeDailyStream(uint256 _streamId) external {
+        require(!dailyStreams[_streamId].active, "Stream is already active");
         dailyStreams[_streamId].active = true;
-        streamsByOwner[msg.sender][_streamId].active = true;
-        emit StreamResumed(recipient, IntervalType.Daily);
+        streamsById[dailyStreams[_streamId].id].active = true;
+        emit StreamResumed(
+            dailyStreams[_streamId].recipient,
+            IntervalType.Daily
+        );
     }
 
-    function resumeMonthlyStream(address recipient,uint256 _streamId) external {
+    function resumeMonthlyStream(uint256 _streamId) external {
+        require(!monthlyStreams[_streamId].active, "Stream is already active");
         monthlyStreams[_streamId].active = true;
-        streamsByOwner[msg.sender][_streamId].active = true;
-        emit StreamResumed(recipient, IntervalType.Monthly);
+        streamsById[monthlyStreams[_streamId].id].active = true;
+        emit StreamResumed(
+            monthlyStreams[_streamId].recipient,
+            IntervalType.Monthly
+        );
     }
 
     function disburseDaily() external {
@@ -183,11 +200,9 @@ function stopDailyStream(address recipient,uint256 _streamId) external {
         }
     }
 
-    function getStreamsByOwner(address owner)
-        external
-        view
-        returns (Stream[] memory)
-    {
+    function getStreamsByOwner(
+        address owner
+    ) external view returns (Stream[] memory) {
         return streamsByOwner[owner];
     }
 }
