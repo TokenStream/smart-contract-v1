@@ -112,6 +112,7 @@ contract SubscriptionService {
         newSubscriber.name = plans[planId].name;
         newSubscriber.fee = plans[planId].fee;
         newSubscriber.userAddress = msg.sender;
+        newSubscriber.subPlanId = planId;
         subArr.push(newSubscriber);
         activeSubscriptions[msg.sender][planId] = true;
         subs[msg.sender].push(newSubscriber);
@@ -124,28 +125,26 @@ contract SubscriptionService {
     }
 
     function pauseSubscription(uint256 planId) external {
-        if (!activeSubscriptions[msg.sender][planId]) {
+        Subscriber storage subscriber = subs[msg.sender][planId];
+        if (!subscriber.active) {
             revert SUBSCRIPTION_NOT_ACTIVE();
         }
-        activeSubscriptions[msg.sender][planId] = false;
-        // Set stopped flag
+        subscriber.active = false;
         stoppedSubscriptions[msg.sender][planId] = true;
-        subs[msg.sender][planId].active = false;
 
         emit SubscriptionPaused(msg.sender, planId);
     }
 
     function resumeSubscription(uint256 planId) external {
-        if (activeSubscriptions[msg.sender][planId]) {
+        Subscriber storage subscriber = subs[msg.sender][planId];
+        if (subscriber.active) {
             revert SUBSCRIPTION_ACTIVE();
         }
         if (!stoppedSubscriptions[msg.sender][planId]) {
             revert SUBSCRIPTION_HAS_NOT_BEEN_STOPPED();
         }
-        activeSubscriptions[msg.sender][planId] = true;
-        // Clear stopped flag
+        subscriber.active = true;
         stoppedSubscriptions[msg.sender][planId] = false;
-        subs[msg.sender][planId].active = true;
 
         emit SubscriptionResumed(msg.sender, planId);
     }
