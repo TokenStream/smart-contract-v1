@@ -42,7 +42,7 @@ contract SalaryStreaming {
     Stream[] public dailyStreams;
     Stream[] public monthlyStreams;
 
-    mapping(uint256 => Stream) public streamsById;
+    mapping(uint256 => Stream) public streamsById; 
 
     struct StreamDetails {
         address recipient;
@@ -50,7 +50,6 @@ contract SalaryStreaming {
     }
 
     mapping(address => uint256) public streamIdsByAddress;
-    mapping(address => Stream[]) public streamsByOwner;
     uint256 private idDailyCounter = 0;
     uint256 private idMonthlyCounter = 0;
 
@@ -62,6 +61,7 @@ contract SalaryStreaming {
         StreamDetails[] calldata _streamDetails,
         IntervalType intervalType
     ) external {
+
         if (intervalType == IntervalType.Daily) {
             for (uint256 i = 0; i < _streamDetails.length; i++) {
                 uint256 _id = idDailyCounter;
@@ -76,8 +76,6 @@ contract SalaryStreaming {
                     streamOwner: msg.sender
                 });
                 dailyStreams.push(newStream);
-                // streamIdsByAddress[_streamDetails[i].recipient] = _id;
-                streamsByOwner[msg.sender].push(newStream);
 
                 emit StreamCreated(
                     _id,
@@ -100,14 +98,13 @@ contract SalaryStreaming {
                     streamOwner: msg.sender
                 });
                 monthlyStreams.push(newStream);
-                // streamIdsByAddress[_streamDetails[i].recipient] = _id;
-                streamsByOwner[msg.sender].push(newStream);
+
                 emit StreamCreated(
                     _id,
                     _streamDetails[i].recipient,
                     IntervalType.Monthly
                 );
-                idMonthlyCounter++;
+                idMonthlyCounter++; 
             }
         }
 
@@ -124,45 +121,35 @@ contract SalaryStreaming {
         return monthlyStreams;
     }
 
-    function stopDailyStream(uint256 _streamId) external {
+
+    function pauseDailyStream(uint256 _streamId) external {
         require(dailyStreams[_streamId].active, "Stream is not active");
         dailyStreams[_streamId].active = false;
         streamsById[dailyStreams[_streamId].id].active = false;
-        emit StreamPaused(
-            dailyStreams[_streamId].recipient,
-            IntervalType.Daily
-        );
+        emit StreamPaused(dailyStreams[_streamId].recipient, IntervalType.Daily);
     }
 
-    function stopMonthlyStream(uint256 _streamId) external {
+    function pauseMonthlyStream(uint256 _streamId) external {
         require(monthlyStreams[_streamId].active, "Stream is not active");
         monthlyStreams[_streamId].active = false;
         streamsById[monthlyStreams[_streamId].id].active = false;
-        emit StreamPaused(
-            monthlyStreams[_streamId].recipient,
-            IntervalType.Monthly
-        );
+        emit StreamPaused(monthlyStreams[_streamId].recipient, IntervalType.Monthly);
     }
 
     function resumeDailyStream(uint256 _streamId) external {
         require(!dailyStreams[_streamId].active, "Stream is already active");
         dailyStreams[_streamId].active = true;
         streamsById[dailyStreams[_streamId].id].active = true;
-        emit StreamResumed(
-            dailyStreams[_streamId].recipient,
-            IntervalType.Daily
-        );
+        emit StreamResumed(dailyStreams[_streamId].recipient, IntervalType.Daily);
     }
 
     function resumeMonthlyStream(uint256 _streamId) external {
         require(!monthlyStreams[_streamId].active, "Stream is already active");
         monthlyStreams[_streamId].active = true;
         streamsById[monthlyStreams[_streamId].id].active = true;
-        emit StreamResumed(
-            monthlyStreams[_streamId].recipient,
-            IntervalType.Monthly
-        );
+        emit StreamResumed(monthlyStreams[_streamId].recipient, IntervalType.Monthly);
     }
+
 
     function disburseDaily() external {
         for (uint256 i = 0; i < dailyStreams.length; i++) {
@@ -200,10 +187,5 @@ contract SalaryStreaming {
         }
     }
 
-    function getStreamsByOwner(
-        address owner
-    ) external view returns (Stream[] memory) {
-        return streamsByOwner[owner];
-    }
 }
 //  [["0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",100],["0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db",200]]
