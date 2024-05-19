@@ -23,7 +23,7 @@ contract AuthenticationTest is Test {
         assertEq(auth.getAddressFromName(name1), address(this));
 
         vm.expectRevert(Authentication.NAME_NOT_AVAILABLE.selector);
-        auth.createAccount(name1); // Test duplicate name
+        auth.createAccount(name1);
     }
 
     function testGetUserInfoFromName() public {
@@ -39,7 +39,7 @@ contract AuthenticationTest is Test {
     function testUsernameExist() public {
         bytes memory name1 = bytes("david");
         bytes memory name2 = bytes("eve");
-
+        
         vm.prank(address(this));
         auth.createAccount(name1);
         assertTrue(auth.usernameExist(name1));
