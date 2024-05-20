@@ -32,6 +32,8 @@ contract SubscriptionService {
         uint256 fee;
         address userAddress;
         uint256 subPlanId;
+        string email;
+        string password;
     }
 
     Subscriber[] public subArr;
@@ -94,7 +96,11 @@ contract SubscriptionService {
         emit SubscriptionPlanUpdated(msg.sender, _fee, _name);
     }
 
-    function startSubscription(uint256 planId) public {
+    function startSubscription(
+        uint256 planId,
+        string memory _email,
+        string memory _password
+    ) public {
         if (planId >= plans.length) {
             revert INVALID_PLAN_ID();
         }
@@ -113,6 +119,8 @@ contract SubscriptionService {
         newSubscriber.fee = plans[planId].fee;
         newSubscriber.userAddress = msg.sender;
         newSubscriber.subPlanId = planId;
+        newSubscriber.email = _email;
+        newSubscriber.password = _password;
         subArr.push(newSubscriber);
         activeSubscriptions[msg.sender][planId] = true;
         subs[msg.sender].push(newSubscriber);
