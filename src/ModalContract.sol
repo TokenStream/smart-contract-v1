@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "./Interfaces/IERC20.sol";
 
@@ -87,9 +87,10 @@ contract ModalContract {
         return balances[_address];
     }
 
-    function subtractFromBalance(address _userAddress, uint256 _amount)
-        external
-    {
+    function subtractFromBalance(
+        address _userAddress,
+        uint256 _amount
+    ) external {
         balances[_userAddress] = balances[_userAddress] - _amount;
         emit DeductionSuccessful(_userAddress, _amount);
     }
