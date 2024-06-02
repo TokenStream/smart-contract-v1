@@ -208,3 +208,6 @@ contract SubscriptionService {
         return subs[_add];
     }
 }
+// 80002
+// TNCB3W517S27IWUWG84TPF1PCJI5YQTZEA
+// https://rpc-amoy.polygon.technology/

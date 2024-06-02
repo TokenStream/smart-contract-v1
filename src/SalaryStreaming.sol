@@ -20,6 +20,7 @@ contract SalaryStreaming {
         uint256 startTime;
         IntervalType intervalType;
         bool active;
+        string name;
         address streamOwner;
     }
 
@@ -45,6 +46,7 @@ contract SalaryStreaming {
     mapping(uint256 => Stream) public streamsById;
 
     struct StreamDetails {
+        string name;
         address recipient;
         uint256 amount;
     }
@@ -68,6 +70,7 @@ contract SalaryStreaming {
                     id: _id,
                     recipient: _streamDetails[i].recipient,
                     amount: _streamDetails[i].amount,
+                    name: _streamDetails[i].name,
                     lastPayment: block.timestamp,
                     startTime: block.timestamp,
                     intervalType: IntervalType.Daily,
@@ -90,6 +93,7 @@ contract SalaryStreaming {
                     id: _id,
                     recipient: _streamDetails[i].recipient,
                     amount: _streamDetails[i].amount,
+                    name: _streamDetails[i].name,
                     lastPayment: block.timestamp,
                     startTime: block.timestamp,
                     intervalType: IntervalType.Monthly,
