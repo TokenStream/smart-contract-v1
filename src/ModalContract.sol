@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import "./Interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 error ONLY_THE_OWNER_CAN_PERFORM_THIS_ACTION();
 error INSUFFICIENT_BALANCE();
