@@ -1,3 +1,13 @@
 {
-  "solidity.compiler.version.remote": "v0.8.26+commit.8a97fa7a"
+  "solidity.compiler.version.remote": "v0.8.26+commit.8a97fa7a",
+  "solidity.compiler": {
+    "outDir": "bin",
+    "type": "Extension",
+    "npm": "solc",
+    "remote": "v0.8.20+commit.a1b79de6",
+    "local": "",
+    "version": {
+      "remote": "v0.8.26+commit.8a97fa7a"
+    }
+  }
 }
